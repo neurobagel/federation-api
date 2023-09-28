@@ -64,16 +64,23 @@ async def get(
 
     """
     cross_node_results = []
-    params = {
-        "min_age": min_age,
-        "max_age": max_age,
-        "sex": sex,
-        "diagnosis": diagnosis,
-        "is_control": is_control,
-        "min_num_sessions": min_num_sessions,
-        "assessment": assessment,
-        "image_modal": image_modal,
-    }
+    params = {}
+    if min_age:
+        params["min_age"] = min_age
+    if max_age:
+        params["max_age"] = max_age
+    if sex:
+        params["sex"] = sex
+    if diagnosis:
+        params["diagnosis"] = diagnosis
+    if is_control:
+        params["is_control"] = is_control
+    if min_num_sessions:
+        params["min_num_sessions"] = min_num_sessions
+    if assessment:
+        params["assessment"] = assessment
+    if image_modal:
+        params["image_modal"] = image_modal
 
     for node_url in util.NEUROBAGEL_NODES:
         response = httpx.get(
@@ -83,12 +90,14 @@ async def get(
             timeout=30.0,
         )
 
+        print("request was: ", response.request.url)
+
         if not response.is_success:
             raise HTTPException(
                 status_code=response.status_code,
                 detail=f"{response.reason_phrase}: {response.text}",
             )
 
-        cross_node_results.append(response)
+        cross_node_results.append(response.json())
 
     return cross_node_results
