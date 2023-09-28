@@ -16,7 +16,7 @@ async def get(
     image_modal: str,
 ):
     """
-    Makes GET requests to one ore more Neurobagel node APIs using httpx where the parameters are Neurobagel query parameters.
+    Makes GET requests to one or more Neurobagel node APIs using httpx where the parameters are Neurobagel query parameters.
 
     Parameters
     ----------
