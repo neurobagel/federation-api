@@ -5,6 +5,7 @@ from fastapi import HTTPException
 
 from . import utility as util
 
+
 async def get(
     min_age: float,
     max_age: float,
@@ -62,7 +63,7 @@ async def get(
     if image_modal:
         params["image_modal"] = image_modal
 
-    for node_url in util.NEUROBAGEL_NODES:
+    for node_url in util.parse_nodes_as_list(util.NEUROBAGEL_NODES):
         response = httpx.get(
             url=node_url,
             params=params,
