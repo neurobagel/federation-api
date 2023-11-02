@@ -69,6 +69,7 @@ async def get(
             params=params,
             # TODO: Revisit timeout value when query performance is improved
             timeout=30.0,
+            follow_redirects=True,
         )
 
         if not response.is_success:
