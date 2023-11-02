@@ -4,10 +4,10 @@ import os
 
 #  Neurobagel nodes
 NEUROBAGEL_NODES = os.environ.get(
-    "NB_NODES", "http://api.neurobagel.org/query/"
+    "NB_NODES", "https://api.neurobagel.org/query/"
 )
 
 
 def parse_nodes_as_list(nodes: str) -> list:
-    """Returns user-defined Neurobagel nodes as a list."""
-    return list(nodes.split(" "))
+    """Returns user-defined Neurobagel nodes as a list, with any empty strings stripped."""
+    return list(filter(None, nodes.split(" ")))
