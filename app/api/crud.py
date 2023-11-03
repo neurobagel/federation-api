@@ -69,6 +69,7 @@ async def get(
             params=params,
             # TODO: Revisit timeout value when query performance is improved
             timeout=30.0,
+            # Enable redirect following (off by default) so APIs behind a proxy can be reached
             follow_redirects=True,
         )
 
