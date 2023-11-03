@@ -3,7 +3,7 @@
 ## Launching the API
 ### 1. Set the Neurobagel nodes to federate over
 Create an `.env` file with the variable `NB_NODES` set to the URLs of the nodes to be federated over. 
-The URLs should be stored as a space-separated string.
+The URLs should be stored as a **space-separated** string.
 
 e.g.,
 ```bash

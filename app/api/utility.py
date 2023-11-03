@@ -9,5 +9,6 @@ NEUROBAGEL_NODES = os.environ.get(
 
 
 def parse_nodes_as_list(nodes: str) -> list:
-    """Returns user-defined Neurobagel nodes as a list, with any empty strings stripped."""
+    """Returns user-defined Neurobagel nodes as a list.
+    Empty strings are filtered out, because they are falsy."""
     return list(filter(None, nodes.split(" ")))
