@@ -65,7 +65,7 @@ async def get(
 
     for node_url in util.parse_nodes_as_list(util.NEUROBAGEL_NODES):
         response = httpx.get(
-            url=node_url,
+            url=node_url+"query/",
             params=params,
             # TODO: Revisit timeout value when query performance is improved
             timeout=30.0,
@@ -80,5 +80,28 @@ async def get(
             )
 
         cross_node_results += response.json()
+
+    return cross_node_results
+
+async def get_term_labels(data_element_URI: str):
+    """Makes GET requests to one or more Neurobagel node APIs using httpx where the parameters are Neurobagel query parameters."""
+
+    cross_node_results = []
+    params = {}
+
+    for node_url in util.parse_nodes_as_list(util.NEUROBAGEL_NODES):
+        response = httpx.get(
+            url=node_url+"attributes/"+data_element_URI+"/vocab",
+            # Enable redirect following (off by default) so APIs behind a proxy can be reached
+            follow_redirects=True,
+        )
+
+        if not response.is_success:
+            raise HTTPException(
+                status_code=response.status_code,
+                detail=f"{response.reason_phrase}: {response.text}",
+            )
+        
+        cross_node_results.append(response.json())
 
     return cross_node_results

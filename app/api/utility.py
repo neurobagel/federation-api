@@ -4,7 +4,7 @@ import os
 
 #  Neurobagel nodes
 NEUROBAGEL_NODES = os.environ.get(
-    "NB_NODES", "https://api.neurobagel.org/query/"
+    "NB_NODES", "https://api.neurobagel.org/"
 )
 
 
