@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 CONTROLLED_TERM_REGEX = r"^[a-zA-Z]+[:]\S+$"
 
+
 class QueryModel(BaseModel):
     """Data model and dependency for API that stores the query parameters to be accepted and validated."""
 
@@ -17,10 +18,12 @@ class QueryModel(BaseModel):
     assessment: str = None
     image_modal: str = None
 
+
 class DataElementURI(str, Enum):
     """Data model for data element URIs that have available vocabulary lookups."""
 
     assessment = "nb:Assessment"
+
 
 class VocabLabelsResponse(BaseModel):
     """Data model for response to a request for all term labels for a vocabulary."""

@@ -3,9 +3,7 @@
 import os
 
 #  Neurobagel nodes
-NEUROBAGEL_NODES = os.environ.get(
-    "NB_NODES", "https://api.neurobagel.org/"
-)
+NEUROBAGEL_NODES = os.environ.get("NB_NODES", "https://api.neurobagel.org/")
 
 
 def parse_nodes_as_list(nodes: str) -> list:

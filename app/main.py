@@ -2,10 +2,10 @@
 
 import uvicorn
 from fastapi import FastAPI
-from fastapi.responses import ORJSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import ORJSONResponse
 
-from .api.routers import query, attributes
+from .api.routers import attributes, query
 
 app = FastAPI(default_response_class=ORJSONResponse)
 
