@@ -1,6 +1,4 @@
 """Data models."""
-from enum import Enum
-
 from pydantic import BaseModel
 
 CONTROLLED_TERM_REGEX = r"^[a-zA-Z]+[:]\S+$"
@@ -17,18 +15,3 @@ class QueryModel(BaseModel):
     min_num_sessions: int = None
     assessment: str = None
     image_modal: str = None
-
-
-class DataElementURI(str, Enum):
-    """Data model for data element URIs that have available vocabulary lookups."""
-
-    assessment = "nb:Assessment"
-
-
-class VocabLabelsResponse(BaseModel):
-    """Data model for response to a request for all term labels for a vocabulary."""
-
-    vocabulary_name: str
-    namespace_url: str
-    namespace_prefix: str
-    term_labels: dict
