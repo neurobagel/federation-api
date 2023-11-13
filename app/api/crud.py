@@ -1,8 +1,5 @@
 """CRUD functions called by path operations."""
 
-import httpx
-from fastapi import HTTPException
-
 from . import utility as util
 
 
@@ -64,48 +61,27 @@ async def get(
         params["image_modal"] = image_modal
 
     for node_url in util.parse_nodes_as_list(util.NEUROBAGEL_NODES):
-        response = httpx.get(
-            url=node_url + "query/",
-            params=params,
-            # TODO: Revisit timeout value when query performance is improved
-            timeout=30.0,
-            # Enable redirect following (off by default) so APIs behind a proxy can be reached
-            follow_redirects=True,
-        )
+        response = util.send_get_request(node_url + "query/", params)
 
-        if not response.is_success:
-            raise HTTPException(
-                status_code=response.status_code,
-                detail=f"{response.reason_phrase}: {response.text}",
-            )
-
-        cross_node_results += response.json()
+        cross_node_results += response
 
     return cross_node_results
 
 
-async def get_terms_labels(data_element_URI: str, labels: bool):
-    """Makes GET requests to one or more Neurobagel node APIs using httpx where the parameter is a Neurobagel variable."""
-
+async def get_terms(data_element_URI: str):
     cross_node_results = []
+    params = {data_element_URI: data_element_URI}
 
     for node_url in util.parse_nodes_as_list(util.NEUROBAGEL_NODES):
-        if labels:
-            url = node_url + "attributes/" + data_element_URI + "/vocab"
-        else:
-            url = node_url + "attributes/" + data_element_URI
-        response = httpx.get(
-            url=url,
-            # Enable redirect following (off by default) so APIs behind a proxy can be reached
-            follow_redirects=True,
+        response = util.send_get_request(
+            node_url + "attributes/" + data_element_URI, params
         )
 
-        if not response.is_success:
-            raise HTTPException(
-                status_code=response.status_code,
-                detail=f"{response.reason_phrase}: {response.text}",
-            )
+        cross_node_results.append(response)
 
-        cross_node_results.append(response.json())
-
-    return cross_node_results
+    unique_terms = set(
+        term
+        for list_of_terms in cross_node_results
+        for term in list_of_terms[data_element_URI]
+    )
+    return {data_element_URI: list(unique_terms)}
