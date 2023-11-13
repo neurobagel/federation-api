@@ -14,7 +14,7 @@ async def get(
     image_modal: str,
 ):
     """
-    Makes GET requests to one or more Neurobagel node APIs using httpx where the parameters are Neurobagel query parameters.
+    Makes GET requests to one or more Neurobagel node APIs using send_get_request utility function where the parameters are Neurobagel query parameters.
 
     Parameters
     ----------
@@ -69,6 +69,19 @@ async def get(
 
 
 async def get_terms(data_element_URI: str):
+    """
+    Makes a GET request to one or more Neurobagel node APIs using send_get_request utility function where the only parameter is a data element URI.
+
+    Parameters
+    ----------
+    data_element_URI : str
+        Controlled term of neurobagel class for which all the available terms should be retrieved.
+
+    Returns
+    -------
+    dict
+        Dictionary where the key is the Neurobagel class and values correspond to all the unique terms representing available (i.e. used) instances of that class.
+    """
     cross_node_results = []
     params = {data_element_URI: data_element_URI}
 

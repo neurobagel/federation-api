@@ -16,6 +16,27 @@ def parse_nodes_as_list(nodes: str) -> list:
 
 
 def send_get_request(url: str, params: list):
+    """
+    Makes a GET request to one or more Neurobagel nodes.
+
+    Parameters
+    ----------
+    url : str
+        URL of Neurobagel node API.
+    params : list
+        Neurobagel query parameters.
+
+    Returns
+    -------
+    dict
+        JSON response from Neurobagel node API.
+
+
+    Raises
+    ------
+    HTTPException
+        _description_
+    """
     response = httpx.get(
         url=url,
         params=params,
