@@ -61,11 +61,11 @@ async def get(
         params["image_modal"] = image_modal
 
     nodes_dict = util.parse_nodes_as_dict(util.NEUROBAGEL_NODES)
-    for node_url in nodes_dict.keys():
+    for node_url, node_name in nodes_dict.items():
         response = util.send_get_request(node_url + "query/", params)
 
         for result in response:
-            result["node_name"] = nodes_dict[node_url]
+            result["node_name"] = node_name
 
         cross_node_results += response
 

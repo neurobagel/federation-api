@@ -16,12 +16,13 @@ def parse_nodes_as_dict(nodes: str) -> list:
     """Returns user-defined Neurobagel nodes as a dict.
     It uses a regular expression to match the url, name pairs.
     Makes sure node URLs end with a slash."""
-    pattern = re.compile(r"\((https?://[^\s]+), ([^\)]+)\)")
+    pattern = re.compile(r"\((?P<url>https?://[^\s]+), (?P<label>[^\)]+)\)")
     matches = pattern.findall(nodes)
     for i in range(len(matches)):
-        if not matches[i][0].endswith("/"):
-            matches[i] = (matches[i][0] + "/", matches[i][1])
-    nodes_dict = {url: name for url, name in matches}
+        url, label = matches[i]
+        if not url.endswith("/"):
+            matches[i] = (url + "/", label)
+    nodes_dict = {url: label for url, label in matches}
     return nodes_dict
 
 
