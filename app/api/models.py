@@ -19,6 +19,7 @@ class QueryModel(BaseModel):
     assessment: str = None
     image_modal: str = None
     # TODO: Replace default value with union of local and public nodes once https://github.com/neurobagel/federation-api/issues/28 is merged
-    node: list[str] = Field(
+    # syntax from https://github.com/tiangolo/fastapi/issues/4445#issuecomment-1117632409
+    node_url: list[str] = Field(
         Query(default=util.parse_nodes_as_list(util.NEUROBAGEL_NODES))
-    )  # syntax from https://github.com/tiangolo/fastapi/issues/4445#issuecomment-1117632409
+    )

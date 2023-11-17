@@ -12,7 +12,7 @@ async def get(
     min_num_sessions: int,
     assessment: str,
     image_modal: str,
-    nodes: list[str],
+    node_urls: list[str],
 ):
     """
     Makes GET requests to one or more Neurobagel node APIs using send_get_request utility function where the parameters are Neurobagel query parameters.
@@ -35,7 +35,7 @@ async def get(
         Non-imaging assessment completed by subjects.
     image_modal : str
         Imaging modality of subject scans.
-    nodes : list[str]
+    node_urls : list[str]
         List of Neurobagel nodes to send the query to.
 
     Returns
@@ -63,7 +63,7 @@ async def get(
     if image_modal:
         params["image_modal"] = image_modal
 
-    for node_url in util.parse_nodes_as_list(util.NEUROBAGEL_NODES):
+    for node_url in node_urls:
         response = util.send_get_request(node_url + "query/", params)
 
         cross_node_results += response
