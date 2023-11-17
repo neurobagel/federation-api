@@ -1,6 +1,7 @@
 """Data models."""
 from fastapi import Query
-from pydantic import BaseModel, Field
+from fastapi.exceptions import HTTPException
+from pydantic import BaseModel, Field, root_validator
 
 from . import utility as util
 
@@ -23,3 +24,18 @@ class QueryModel(BaseModel):
     node_url: list[str] = Field(
         Query(default=util.parse_nodes_as_list(util.NEUROBAGEL_NODES))
     )
+
+    @root_validator
+    def check_nodes_are_recognized(cls, values):
+        """Check that all node URLs specified in the query exist in the node index for the API instance. If not, raise an informative exception."""
+        unrecognized_nodes = list(
+            set(values["node_url"])
+            - set(util.parse_nodes_as_list(util.NEUROBAGEL_NODES))
+        )
+        if unrecognized_nodes:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Unrecognized Neurobagel node URL(s): {unrecognized_nodes}. "
+                f"The following nodes are available for federation: {util.parse_nodes_as_list(util.NEUROBAGEL_NODES)}",
+            )
+        return values
