@@ -1,4 +1,6 @@
 """Data models."""
+from typing import Optional, Union
+
 from fastapi import Query
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel, Field, root_validator
@@ -39,3 +41,18 @@ class QueryModel(BaseModel):
                 f"The following nodes are available for federation: {util.parse_nodes_as_list(util.NEUROBAGEL_NODES)}",
             )
         return values
+
+
+class CohortQueryResponse(BaseModel):
+    """Data model for query results for one matching dataset (i.e., a cohort)."""
+
+    node_name: str
+    dataset_uuid: str
+    # dataset_file_path: str  # TODO: Revisit this field once we have datasets without imaging info/sessions.
+    dataset_name: str
+    dataset_portal_uri: Optional[str]
+    dataset_total_subjects: int
+    records_protected: bool
+    num_matching_subjects: int
+    subject_data: Union[list[dict], str]
+    image_modals: list
