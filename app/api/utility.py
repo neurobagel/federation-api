@@ -1,4 +1,4 @@
-"""Constants for federation."""
+"""Constants and utility functions for federation."""
 
 import os
 
