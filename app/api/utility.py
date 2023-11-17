@@ -7,7 +7,7 @@ import httpx
 from fastapi import HTTPException
 
 #  Neurobagel nodes
-NEUROBAGEL_NODES = os.environ.get(
+LOCAL_NODES = os.environ.get(
     "LOCAL_NB_NODES", "(https://api.neurobagel.org/, OpenNeuro)"
 )
 FEDERATION_NODES = {}
@@ -34,7 +34,7 @@ async def create_federation_node_index() -> dict:
     Creates an index of nodes for federation.
     Fetches the names and URLs of public Neurobagel nodes from a remote directory file, and combines them with the user-defined local nodes.
     """
-    local_nodes = parse_nodes_as_dict(NEUROBAGEL_NODES)
+    local_nodes = parse_nodes_as_dict(LOCAL_NODES)
 
     public_node_directory_url = "https://raw.githubusercontent.com/neurobagel/menu/main/node_directory/neurobagel_public_nodes.json"
     public_nodes = httpx.get(

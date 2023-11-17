@@ -10,5 +10,5 @@ async def get_nodes():
     """Returns a dict of all available nodes apis where key is node URL and value is node name."""
     return [
         {"NodeName": v, "ApiURL": k}
-        for k, v in util.parse_nodes_as_dict(util.NEUROBAGEL_NODES).items()
+        for k, v in util.parse_nodes_as_dict(util.LOCAL_NODES).items()
     ]
