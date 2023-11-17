@@ -24,21 +24,20 @@ class QueryModel(BaseModel):
     # TODO: Replace default value with union of local and public nodes once https://github.com/neurobagel/federation-api/issues/28 is merged
     # syntax from https://github.com/tiangolo/fastapi/issues/4445#issuecomment-1117632409
     node_url: list[str] = Field(
-        Query(default=util.parse_nodes_as_dict(util.LOCAL_NODES))
+        Query(default=list(util.FEDERATION_NODES.keys()))
     )
 
     @root_validator
     def check_nodes_are_recognized(cls, values):
         """Check that all node URLs specified in the query exist in the node index for the API instance. If not, raise an informative exception."""
         unrecognized_nodes = list(
-            set(values["node_url"])
-            - set(util.parse_nodes_as_dict(util.LOCAL_NODES))
+            set(values["node_url"]) - set(util.FEDERATION_NODES.keys())
         )
         if unrecognized_nodes:
             raise HTTPException(
                 status_code=422,
                 detail=f"Unrecognized Neurobagel node URL(s): {unrecognized_nodes}. "
-                f"The following nodes are available for federation: {util.parse_nodes_as_dict(util.LOCAL_NODES)}",
+                f"The following nodes are available for federation: {list(util.FEDERATION_NODES.keys())}",
             )
         return values
 

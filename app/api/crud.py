@@ -92,7 +92,7 @@ async def get_terms(data_element_URI: str):
     cross_node_results = []
     params = {data_element_URI: data_element_URI}
 
-    for node_url in util.parse_nodes_as_dict(util.LOCAL_NODES).keys():
+    for node_url in util.FEDERATION_NODES:
         response = util.send_get_request(
             node_url + "attributes/" + data_element_URI, params
         )
