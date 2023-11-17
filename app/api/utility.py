@@ -10,12 +10,15 @@ from fastapi import HTTPException
 NEUROBAGEL_NODES = os.environ.get(
     "LOCAL_NB_NODES", "(https://api.neurobagel.org/, OpenNeuro)"
 )
+FEDERATION_NODES = {}
 
 
 def parse_nodes_as_dict(nodes: str) -> list:
-    """Returns user-defined Neurobagel nodes as a dict.
+    """
+    Transforms a string of user-defined Neurobagel nodes (from an environment variable) to a dict where the keys are the node URLs, and the values are the node names.
     It uses a regular expression to match the url, name pairs.
-    Makes sure node URLs end with a slash."""
+    Makes sure node URLs end with a slash.
+    """
     pattern = re.compile(r"\((?P<url>https?://[^\s]+), (?P<label>[^\)]+)\)")
     matches = pattern.findall(nodes)
     for i in range(len(matches)):
@@ -24,6 +27,27 @@ def parse_nodes_as_dict(nodes: str) -> list:
             matches[i] = (url + "/", label)
     nodes_dict = {url: label for url, label in matches}
     return nodes_dict
+
+
+async def create_federation_node_index() -> dict:
+    """
+    Creates an index of nodes for federation.
+    Fetches the names and URLs of public Neurobagel nodes from a remote directory file, and combines them with the user-defined local nodes.
+    """
+    local_nodes = parse_nodes_as_dict(NEUROBAGEL_NODES)
+
+    public_node_directory_url = "https://raw.githubusercontent.com/neurobagel/menu/main/node_directory/neurobagel_public_nodes.json"
+    public_nodes = httpx.get(
+        url=public_node_directory_url,
+    ).json()
+
+    # This step will remove any duplicate keys from the local and public node dicts, giving priority to the local nodes.
+    FEDERATION_NODES.update(
+        {
+            **{node["ApiURL"]: node["NodeName"] for node in public_nodes},
+            **local_nodes,
+        }
+    )
 
 
 def send_get_request(url: str, params: list):
