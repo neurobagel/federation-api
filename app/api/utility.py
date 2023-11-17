@@ -2,6 +2,7 @@
 
 import os
 import re
+import warnings
 
 import httpx
 from fastapi import HTTPException
@@ -36,15 +37,32 @@ async def create_federation_node_index() -> dict:
     """
     local_nodes = parse_nodes_as_dict(LOCAL_NODES)
 
-    public_node_directory_url = "https://raw.githubusercontent.com/neurobagel/menu/main/node_directory/neurobagel_public_nodes.json"
-    public_nodes = httpx.get(
-        url=public_node_directory_url,
-    ).json()
+    node_directory_url = "https://raw.githubusercontent.com/neurobagel/menu/main/node_directory/neurobagel_public_nodes.json"
+    node_directory_response = httpx.get(
+        url=node_directory_url,
+    )
+    if node_directory_response.is_success:
+        public_nodes = {
+            node["ApiURL"]: node["NodeName"]
+            for node in node_directory_response.json()
+        }
+    else:
+        warnings.warn(
+            f"""
+            Unable to fetch directory of public Neurobagel nodes from {node_directory_url}.
+            The federation API will only register the nodes defined locally for this API: {local_nodes}.
+
+            Details of the response from the source:
+            Status code {node_directory_response.status_code}
+            {node_directory_response.reason_phrase}: {node_directory_response.text}
+            """
+        )
+        public_nodes = {}
 
     # This step will remove any duplicate keys from the local and public node dicts, giving priority to the local nodes.
     FEDERATION_NODES.update(
         {
-            **{node["ApiURL"]: node["NodeName"] for node in public_nodes},
+            **public_nodes,
             **local_nodes,
         }
     )
