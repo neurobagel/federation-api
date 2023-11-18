@@ -68,6 +68,17 @@ async def create_federation_node_index() -> dict:
     )
 
 
+def check_nodes_are_recognized(node_urls: list):
+    """Check that all node URLs specified in the query exist in the node index for the API instance. If not, raise an informative exception."""
+    unrecognized_nodes = list(set(node_urls) - set(FEDERATION_NODES.keys()))
+    if unrecognized_nodes:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Unrecognized Neurobagel node URL(s): {unrecognized_nodes}. "
+            f"The following nodes are available for federation: {list(FEDERATION_NODES.keys())}",
+        )
+
+
 def send_get_request(url: str, params: list):
     """
     Makes a GET request to one or more Neurobagel nodes.

@@ -45,6 +45,16 @@ async def get(
 
     """
     cross_node_results = []
+
+    # Remove and ignore node URLs that are empty strings
+    node_urls = list(filter(None, node_urls))
+
+    if node_urls:
+        util.check_nodes_are_recognized(node_urls)
+    else:
+        node_urls = list(util.FEDERATION_NODES.keys())
+
+    # Node API query parameters
     params = {}
     if min_age:
         params["min_age"] = min_age
