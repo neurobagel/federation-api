@@ -32,7 +32,7 @@ def parse_nodes_as_dict(nodes: str) -> list:
 
 async def create_federation_node_index() -> dict:
     """
-    Creates an index of nodes for federation.
+    Creates an index of nodes for federation, which is a dict where the keys are the node URLs, and the values are the node names.
     Fetches the names and URLs of public Neurobagel nodes from a remote directory file, and combines them with the user-defined local nodes.
     """
     local_nodes = parse_nodes_as_dict(LOCAL_NODES)
