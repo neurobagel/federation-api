@@ -14,6 +14,13 @@ LOCAL_NODES = os.environ.get(
 FEDERATION_NODES = {}
 
 
+def add_trailing_slash(url: str) -> str:
+    """Add trailing slash to a URL if it does not already have one."""
+    if not url.endswith("/"):
+        url += "/"
+    return url
+
+
 def parse_nodes_as_dict(nodes: str) -> list:
     """
     Transforms a string of user-defined Neurobagel nodes (from an environment variable) to a dict where the keys are the node URLs, and the values are the node names.
@@ -22,11 +29,7 @@ def parse_nodes_as_dict(nodes: str) -> list:
     """
     pattern = re.compile(r"\((?P<url>https?://[^\s]+), (?P<label>[^\)]+)\)")
     matches = pattern.findall(nodes)
-    for i in range(len(matches)):
-        url, label = matches[i]
-        if not url.endswith("/"):
-            matches[i] = (url + "/", label)
-    nodes_dict = {url: label for url, label in matches}
+    nodes_dict = {add_trailing_slash(url): label for url, label in matches}
     return nodes_dict
 
 
@@ -43,7 +46,7 @@ async def create_federation_node_index() -> dict:
     )
     if node_directory_response.is_success:
         public_nodes = {
-            node["ApiURL"]: node["NodeName"]
+            add_trailing_slash(node["ApiURL"]): node["NodeName"]
             for node in node_directory_response.json()
         }
     else:
