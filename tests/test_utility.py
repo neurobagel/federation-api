@@ -1,6 +1,8 @@
 import os
+from contextlib import nullcontext as does_not_raise
 
 import pytest
+from fastapi import HTTPException
 
 from app.api import utility as util
 
@@ -41,3 +43,40 @@ def test_parse_nodes_as_dict(monkeypatch, set_nodes, expected_nodes):
             os.environ.get("NB_NODES", "https://api.neurobagel.org/query/")
         )
     ) == sorted(expected_nodes)
+
+
+@pytest.mark.parametrize(
+    "node_url_list, expectation, unrecognized_urls",
+    [
+        (["https://firstknownnode.org/"], does_not_raise(), None),
+        ([], does_not_raise(), None),
+        (
+            ["https://firstknownnode.org/", "https://mysterynode.org/"],
+            pytest.raises(HTTPException),
+            "['https://mysterynode.org/']",
+        ),
+        (
+            ["https://mysterynode.org/", "https://unknownnode.org/"],
+            pytest.raises(HTTPException),
+            "['https://mysterynode.org/', 'https://unknownnode.org/']",
+        ),
+    ],
+)
+def test_check_nodes_are_recognized(
+    monkeypatch, node_url_list, expectation, unrecognized_urls
+):
+    """Test that function correctly errors out when any node URL not found in the federation node index is present, but not otherwise."""
+    mock_federation_nodes = {
+        "https://firstknownnode.org/": "My First Node",
+        "https://secondknownnode.org/": "My Second Node",
+    }
+
+    monkeypatch.setattr(util, "FEDERATION_NODES", mock_federation_nodes)
+
+    with expectation as exc_info:
+        util.check_nodes_are_recognized(node_url_list)
+    if exc_info is not None:
+        assert (
+            f"Unrecognized Neurobagel node URL(s): {unrecognized_urls}"
+            in exc_info.value.detail
+        )
