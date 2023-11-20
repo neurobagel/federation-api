@@ -11,8 +11,8 @@ from app.api import utility as util
     "set_nodes, expected_nodes",
     [
         (
-            "(https://firstnode.neurobagel.org/query, firstnode)",
-            {"https://firstnode.neurobagel.org/query/": "firstnode"},
+            "(http://firstnode.neurobagel.org/query, firstnode)",
+            {"http://firstnode.neurobagel.org/query/": "firstnode"},
         ),
         (
             "(https://firstnode.neurobagel.org/query/, firstnode) (https://secondnode.neurobagel.org/query, secondnode)",
@@ -35,6 +35,13 @@ from app.api import utility as util
         ),
         (
             "(https://firstnode.neurobagel.org/query/, firstnode)(https://secondnode.neurobagel.org/query, secondnode)",
+            {
+                "https://firstnode.neurobagel.org/query/": "firstnode",
+                "https://secondnode.neurobagel.org/query/": "secondnode",
+            },
+        ),
+        (
+            "(https://firstnode.neurobagel.org/query/,firstnode)(https://secondnode.neurobagel.org/query,secondnode)",
             {
                 "https://firstnode.neurobagel.org/query/": "firstnode",
                 "https://secondnode.neurobagel.org/query/": "secondnode",
