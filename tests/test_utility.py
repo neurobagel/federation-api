@@ -38,6 +38,7 @@ from app.api import utility as util
 def test_parse_nodes_as_dict(monkeypatch, set_nodes, expected_nodes):
     """Test that Neurobagel node URLs provided in a string environment variable are correctly parsed into a list."""
     monkeypatch.setenv("LOCAL_NB_NODES", set_nodes)
+    # TODO: This currently only compares the keys of the dicts, not the values, due to calling sorted(). This is probably not what we want.
     assert sorted(
         util.parse_nodes_as_dict(
             os.environ.get(
