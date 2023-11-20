@@ -97,6 +97,7 @@ def validate_query_node_url_list(node_urls: list) -> list:
         node_urls = list(dict.fromkeys(node_urls))
         check_nodes_are_recognized(node_urls)
     else:
+        # default to searching over all known nodes
         node_urls = list(FEDERATION_NODES.keys())
     return node_urls
 

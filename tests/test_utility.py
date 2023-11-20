@@ -82,7 +82,7 @@ def test_parse_nodes_as_dict(monkeypatch, set_nodes, expected_nodes):
 def test_check_nodes_are_recognized(
     monkeypatch, node_url_list, expectation, unrecognized_urls
 ):
-    """Test that function correctly errors out when any node URL not found in the federation node index is present, but not otherwise."""
+    """Test that we raise a helpful error only when the user is trying to query an unknown node."""
     mock_federation_nodes = {
         "https://firstknownnode.org/": "My First Node",
         "https://secondknownnode.org/": "My Second Node",
@@ -125,7 +125,7 @@ def test_check_nodes_are_recognized(
 def test_validate_query_node_url_list(
     monkeypatch, raw_url_list, expected_url_list
 ):
-    """Test that function correctly formats and validates node URL list passed as values to the query endpoint, including implementing defaults."""
+    """Test that provided URLs are deduplicated, get a trailing slash, and default to FEDERATION_NODES if none are provided."""
     mock_federation_nodes = {
         "https://firstknownnode.org/": "My First Node",
         "https://secondknownnode.org/": "My Second Node",
