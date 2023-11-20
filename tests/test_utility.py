@@ -104,6 +104,14 @@ def test_check_nodes_are_recognized(
             ["", "https://secondknownnode.org"],
             ["https://secondknownnode.org/"],
         ),
+        (
+            [
+                "https://secondknownnode.org/",
+                "https://firstknownnode.org",
+                "https://secondknownnode.org/",
+            ],
+            ["https://secondknownnode.org/", "https://firstknownnode.org/"],
+        ),
         ([], ["https://firstknownnode.org/", "https://secondknownnode.org/"]),
     ],
 )
