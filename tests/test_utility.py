@@ -33,6 +33,13 @@ from app.api import utility as util
                 "https://secondnode.neurobagel.org/query/": "secondnode",
             },
         ),
+        (
+            "(https://firstnode.neurobagel.org/query/, firstnode)(https://secondnode.neurobagel.org/query, secondnode)",
+            {
+                "https://firstnode.neurobagel.org/query/": "firstnode",
+                "https://secondnode.neurobagel.org/query/": "secondnode",
+            },
+        ),
     ],
 )
 def test_parse_nodes_as_dict(monkeypatch, set_nodes, expected_nodes):

@@ -7,7 +7,7 @@ import warnings
 import httpx
 from fastapi import HTTPException
 
-#  Neurobagel nodes
+#  Neurobagel nodes - TODO: remove default value?
 LOCAL_NODES = os.environ.get(
     "LOCAL_NB_NODES", "(https://api.neurobagel.org/, OpenNeuro)"
 )
@@ -27,6 +27,7 @@ def parse_nodes_as_dict(nodes: str) -> list:
     It uses a regular expression to match the url, name pairs.
     Makes sure node URLs end with a slash.
     """
+    # TODO: Pattern should match both http and https URLs
     pattern = re.compile(r"\((?P<url>https?://[^\s]+), (?P<label>[^\)]+)\)")
     matches = pattern.findall(nodes)
     nodes_dict = {add_trailing_slash(url): label for url, label in matches}
