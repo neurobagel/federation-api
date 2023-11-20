@@ -46,17 +46,7 @@ async def get(
     """
     cross_node_results = []
 
-    # Remove and ignore node URLs that are empty strings
-    node_urls = list(filter(None, node_urls))
-
-    # Format and validate node URLs
-    if node_urls:
-        node_urls = [
-            util.add_trailing_slash(node_url) for node_url in node_urls
-        ]
-        util.check_nodes_are_recognized(node_urls)
-    else:
-        node_urls = list(util.FEDERATION_NODES.keys())
+    node_urls = util.validate_query_node_url_list(node_urls)
 
     # Node API query parameters
     params = {}

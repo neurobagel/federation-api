@@ -72,14 +72,33 @@ async def create_federation_node_index() -> dict:
 
 
 def check_nodes_are_recognized(node_urls: list):
-    """Check that all node URLs specified in the query exist in the node index for the API instance. If not, raise an informative exception."""
-    unrecognized_nodes = list(set(node_urls) - set(FEDERATION_NODES.keys()))
+    """
+    Check that all node URLs specified in the query exist in the node index for the API instance.
+    If not, raise an informative exception where the unrecognized node URLs are listed in alphabetical order.
+    """
+    unrecognized_nodes = sorted(
+        set(node_urls) - set(FEDERATION_NODES.keys())
+    )  # Resulting set is sorted alphabetically to make the error message deterministic
     if unrecognized_nodes:
         raise HTTPException(
             status_code=422,
             detail=f"Unrecognized Neurobagel node URL(s): {unrecognized_nodes}. "
             f"The following nodes are available for federation: {list(FEDERATION_NODES.keys())}",
         )
+
+
+def validate_query_node_url_list(node_urls: list) -> list:
+    """Format and validate node URLs passed as values to the query endpoint, including setting a default list of node URLs when none are provided."""
+    # Remove and ignore node URLs that are empty strings
+    node_urls = list(filter(None, node_urls))
+    if node_urls:
+        node_urls = [add_trailing_slash(node_url) for node_url in node_urls]
+        # Remove duplicates while preserving order
+        node_urls = list(dict.fromkeys(node_urls))
+        check_nodes_are_recognized(node_urls)
+    else:
+        node_urls = list(FEDERATION_NODES.keys())
+    return node_urls
 
 
 def send_get_request(url: str, params: list):

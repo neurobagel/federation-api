@@ -83,3 +83,32 @@ def test_check_nodes_are_recognized(
             f"Unrecognized Neurobagel node URL(s): {unrecognized_urls}"
             in exc_info.value.detail
         )
+
+
+@pytest.mark.parametrize(
+    "raw_url_list, expected_url_list",
+    [
+        (["https://firstknownnode.org"], ["https://firstknownnode.org/"]),
+        (
+            ["https://firstknownnode.org", "https://secondknownnode.org/"],
+            ["https://firstknownnode.org/", "https://secondknownnode.org/"],
+        ),
+        (
+            ["", "https://secondknownnode.org"],
+            ["https://secondknownnode.org/"],
+        ),
+        ([], ["https://firstknownnode.org/", "https://secondknownnode.org/"]),
+    ],
+)
+def test_validate_query_node_url_list(
+    monkeypatch, raw_url_list, expected_url_list
+):
+    """Test that function correctly formats and validates node URL list passed as values to the query endpoint, including implementing defaults."""
+    mock_federation_nodes = {
+        "https://firstknownnode.org/": "My First Node",
+        "https://secondknownnode.org/": "My Second Node",
+    }
+
+    monkeypatch.setattr(util, "FEDERATION_NODES", mock_federation_nodes)
+
+    assert util.validate_query_node_url_list(raw_url_list) == expected_url_list
