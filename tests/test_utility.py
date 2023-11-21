@@ -8,6 +8,18 @@ from app.api import utility as util
 
 
 @pytest.mark.parametrize(
+    "url, expected_url",
+    [
+        ("https://publicnode.org", "https://publicnode.org/"),
+        ("https://publicnode.org/", "https://publicnode.org/"),
+    ],
+)
+def test_add_trailing_slash(url, expected_url):
+    """Test that a trailing slash is added to a URL if it does not already have one."""
+    assert util.add_trailing_slash(url) == expected_url
+
+
+@pytest.mark.parametrize(
     "set_nodes, expected_nodes",
     [
         (
