@@ -14,6 +14,8 @@ Create a `fed.env` file with the variable `LOCAL_NB_NODES` containing the URLs a
 Each node should be wrapped in brackets `()`, with the URL and name of the node (in that order) separated by a comma.
 The variable must be an **unquoted** string.
 
+This repo contains a [template `fed.env`](/fed.env) file that you can edit.
+
 e.g.,
 ```bash
 LOCAL_NB_NODES=(https://myfirstnode.org/,First Node)(https://mysecondnode.org/,Second Node)
