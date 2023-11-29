@@ -1,4 +1,5 @@
 import os
+from contextlib import nullcontext as does_not_raise
 
 import pytest
 from fastapi import HTTPException
@@ -118,9 +119,9 @@ def test_unrecognized_query_nodes_raise_error(
     assert (
         f"Unrecognized Neurobagel node URL(s): {unrecognized_urls}"
         in exc_info.value.detail
-    )
+    )  
 
-
+    
 @pytest.mark.parametrize(
     "raw_url_list, expected_url_list",
     [

@@ -14,7 +14,7 @@ from app.api import utility as util
 def test_nodes_discovery_endpoint(test_app, monkeypatch, local_nodes):
     """Test that a federation node index is correctly created from locally set and remote node lists."""
     monkeypatch.setattr(util, "LOCAL_NODES", local_nodes)
-
+  
     def mock_httpx_get(**kwargs):
         return httpx.Response(
             status_code=200,
