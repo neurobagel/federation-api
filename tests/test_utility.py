@@ -75,7 +75,7 @@ def test_parse_nodes_as_dict(monkeypatch, set_nodes, expected_nodes):
 
 
 def test_recognized_query_nodes_do_not_raise_error(monkeypatch):
-    """Test that node URLs found in the federation node index does not raise an error."""
+    """Test that node URLs found in the federation node index do not raise an error."""
     monkeypatch.setattr(
         util,
         "FEDERATION_NODES",
