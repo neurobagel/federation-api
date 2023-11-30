@@ -8,9 +8,6 @@ import httpx
 from fastapi import HTTPException
 
 LOCAL_NODE_INDEX_PATH = Path(__file__).parents[2] / "local_nb_nodes.json"
-# LOCAL_NODES = os.environ.get(
-#     "LOCAL_NB_NODES", "(https://api.neurobagel.org/, OpenNeuro)"
-# )
 FEDERATION_NODES = {}
 
 
@@ -27,13 +24,21 @@ def parse_nodes_as_dict(path: Path) -> dict:
     where the keys are the node URLs, and the values are the node names.
     Makes sure node URLs end with a slash.
     """
+    # TODO: Add more validation of input JSON, including for JSONDecodeError (invalid JSON)
     if path.exists() and path.stat().st_size > 0:
         with open(path, "r") as f:
             local_nodes = json.load(f)
-        return {
-            add_trailing_slash(node["ApiURL"]): node["NodeName"]
-            for node in local_nodes.items()
-        }
+        if local_nodes:
+            if isinstance(local_nodes, list):
+                return {
+                    add_trailing_slash(node["ApiURL"]): node["NodeName"]
+                    for node in local_nodes
+                }
+            return {
+                add_trailing_slash(local_nodes["ApiURL"]): local_nodes[
+                    "NodeName"
+                ]
+            }
 
     return {}
 
