@@ -6,12 +6,6 @@ from fastapi import HTTPException
 from app.api import utility as util
 
 
-@pytest.fixture
-def tmp_local_nb_nodes_path(tmp_path):
-    """Return a temporary path to a local nodes config JSON file for testing."""
-    return tmp_path / "local_nb_nodes.json"
-
-
 @pytest.mark.parametrize(
     "url, expected_url",
     [
@@ -53,15 +47,16 @@ def test_add_trailing_slash(url, expected_url):
         ({}, {}),
     ],
 )
-def test_parse_nodes_as_dict(
-    set_nodes, expected_nodes, tmp_local_nb_nodes_path
-):
+def test_parse_nodes_as_dict(set_nodes, expected_nodes, tmp_path):
     """Test that Neurobagel nodes provided via a JSON file are correctly parsed into a list."""
     # First create a temporary input config file for the test to read
-    with open(tmp_local_nb_nodes_path, "w") as f:
+    with open(tmp_path / "local_nb_nodes.json", "w") as f:
         f.write(json.dumps(set_nodes, indent=2))
 
-    assert util.parse_nodes_as_dict(tmp_local_nb_nodes_path) == expected_nodes
+    assert (
+        util.parse_nodes_as_dict(tmp_path / "local_nb_nodes.json")
+        == expected_nodes
+    )
 
 
 def test_recognized_query_nodes_do_not_raise_error(monkeypatch):
