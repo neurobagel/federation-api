@@ -136,7 +136,7 @@ def test_unset_local_nodes_raises_warning(test_app, monkeypatch):
             ]
 
     assert len(w) == 1
-    assert "No local Neurobagel nodes found" in w[0].message.args[0]
+    assert "No local Neurobagel nodes defined or found" in w[0].message.args[0]
 
 
 def test_no_available_nodes_raises_error(monkeypatch, test_app):

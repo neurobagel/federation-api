@@ -53,7 +53,7 @@ async def create_federation_node_index():
 
     if not local_nodes:
         warnings.warn(
-            f"No local Neurobagel nodes found. Federation will be limited to nodes available from the Neurobagel public node directory {node_directory_url}. "
+            f"No local Neurobagel nodes defined or found. Federation will be limited to nodes available from the Neurobagel public node directory {node_directory_url}. "
             "(To specify one or more local nodes to federate over, define them in a 'local_nb_nodes.json' file in the current directory and relaunch the API.)\n"
         )
 

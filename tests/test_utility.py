@@ -57,6 +57,7 @@ def test_parse_nodes_as_dict(
     set_nodes, expected_nodes, tmp_local_nb_nodes_path
 ):
     """Test that Neurobagel nodes provided via a JSON file are correctly parsed into a list."""
+    # First create a temporary input config file for the test to read
     with open(tmp_local_nb_nodes_path, "w") as f:
         f.write(json.dumps(set_nodes, indent=2))
 
