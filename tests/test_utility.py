@@ -191,8 +191,10 @@ def test_schema_invalid_nodes_raise_warning(set_nodes, expected_nodes, tmp_path)
     with open(tmp_path / "local_nb_nodes.json", "w") as f:
         f.write(json.dumps(set_nodes, indent=2))
         
-    with pytest.warns(UserWarning, match="Your JSON does not match the schema"):
-        util.parse_nodes_as_dict(tmp_path / "local_nb_nodes.json")
+    with pytest.warns(UserWarning, match=r"Some of the nodes in the JSON are invalid.*"):
+        nodes = util.parse_nodes_as_dict(tmp_path / "local_nb_nodes.json")
+        
+    assert nodes == expected_nodes
 
 
 def test_invalid_json_raises_warning(tmp_path):
@@ -202,4 +204,4 @@ def test_invalid_json_raises_warning(tmp_path):
         f.write("this is not valid JSON")
         
     with pytest.warns(UserWarning, match="You provided an invalid JSON"):
-        util.parse_nodes_as_dict(tmp_path / "local_nb_nodes.json")
+        nodes = util.parse_nodes_as_dict(tmp_path / "local_nb_nodes.json")

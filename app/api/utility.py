@@ -5,15 +5,42 @@ import warnings
 from pathlib import Path
 
 import httpx
-from jsonschema import Draft7Validator
+import jsonschema
+from jsonschema import Draft7Validator, validate
 from fastapi import HTTPException
 
 LOCAL_NODE_INDEX_PATH = Path(__file__).parents[2] / "local_nb_nodes.json"
-LOCAL_NODE_SCHEMA_PATH = Path(__file__).parents[2] / "node_schema.json"
 FEDERATION_NODES = {}
 
-with open(LOCAL_NODE_SCHEMA_PATH, "r") as f:
-    LOCAL_NODE_SCHEMA = json.load(f)
+LOCAL_NODE_SCHEMA = {
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "node": {
+      "type": "object",
+      "properties": {
+        "ApiURL": {
+          "type": "string",
+          "pattern": "^(http|https)://"
+        },
+        "NodeName": {
+          "type": "string"
+        }
+      },
+      "required": ["ApiURL", "NodeName"],
+      "additionalProperties": False
+    }
+  },
+  "oneOf": [
+    {
+      "type": "array",
+      "items": { "$ref": "#/definitions/node" },
+      "minItems": 1
+    },
+    {
+      "$ref": "#/definitions/node"
+    }
+  ]
+}
 validator = Draft7Validator(LOCAL_NODE_SCHEMA)
 
 
@@ -30,7 +57,6 @@ def parse_nodes_as_dict(path: Path) -> dict:
     where the keys are the node URLs, and the values are the node names.
     Makes sure node URLs end with a slash.
     """
-    # TODO: Add more validation of input JSON
     if path.exists() and path.stat().st_size > 0:
         try:
             with open(path, "r") as f:
@@ -39,21 +65,25 @@ def parse_nodes_as_dict(path: Path) -> dict:
             warnings.warn(f"You provided an invalid JSON file at {path}.")
             local_nodes = []
 
-        if not validator.is_valid(local_nodes):
-            warnings.warn("Your JSON does not match the schema.")
-            local_nodes = []
+        input_nodes = local_nodes if isinstance(local_nodes, list) else [local_nodes]
+        valid_nodes = []
+        invalid_nodes = []
+        for node in input_nodes:
+            try:
+                validate(instance=node, schema=LOCAL_NODE_SCHEMA["definitions"]["node"])
+                valid_nodes.append(node)
+            except jsonschema.ValidationError:
+                invalid_nodes.append(node)
 
-        if local_nodes:
-            if isinstance(local_nodes, list):
+        if invalid_nodes:
+            warnings.warn(
+                f"Some of the nodes in the JSON are invalid: {invalid_nodes}"
+            )
+        if valid_nodes:
                 return {
                     add_trailing_slash(node["ApiURL"]): node["NodeName"]
-                    for node in local_nodes
+                    for node in valid_nodes
                 }
-            return {
-                add_trailing_slash(local_nodes["ApiURL"]): local_nodes[
-                    "NodeName"
-                ]
-            }
 
     return {}
 
