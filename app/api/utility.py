@@ -5,10 +5,16 @@ import warnings
 from pathlib import Path
 
 import httpx
+from jsonschema import Draft7Validator
 from fastapi import HTTPException
 
 LOCAL_NODE_INDEX_PATH = Path(__file__).parents[2] / "local_nb_nodes.json"
+LOCAL_NODE_SCHEMA_PATH = Path(__file__).parents[2] / "node_schema.json"
 FEDERATION_NODES = {}
+
+with open(LOCAL_NODE_SCHEMA_PATH, "r") as f:
+    LOCAL_NODE_SCHEMA = json.load(f)
+validator = Draft7Validator(LOCAL_NODE_SCHEMA)
 
 
 def add_trailing_slash(url: str) -> str:
@@ -32,6 +38,11 @@ def parse_nodes_as_dict(path: Path) -> dict:
         except json.JSONDecodeError:
             warnings.warn(f"You provided an invalid JSON file at {path}.")
             local_nodes = []
+
+        if not validator.is_valid(local_nodes):
+            warnings.warn("Your JSON does not match the schema.")
+            local_nodes = []
+
         if local_nodes:
             if isinstance(local_nodes, list):
                 return {
