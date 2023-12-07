@@ -1,4 +1,5 @@
 import json
+from json import JSONDecodeError
 
 import pytest
 from fastapi import HTTPException
@@ -144,3 +145,14 @@ def test_validate_query_node_url_list(
     )
 
     assert util.validate_query_node_url_list(raw_url_list) == expected_url_list
+
+
+
+def test_invalid_json_raises_warning(tmp_path):
+    """Ensure that an invalid JSON file raises a warning but doesn't crash the app."""
+    
+    with open(tmp_path / "local_nb_nodes.json", "w") as f:
+        f.write("this is not valid JSON")
+        
+    with pytest.warns(UserWarning, match="You provided an invalid JSON"):
+        util.parse_nodes_as_dict(tmp_path / "local_nb_nodes.json")

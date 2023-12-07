@@ -24,10 +24,14 @@ def parse_nodes_as_dict(path: Path) -> dict:
     where the keys are the node URLs, and the values are the node names.
     Makes sure node URLs end with a slash.
     """
-    # TODO: Add more validation of input JSON, including for JSONDecodeError (invalid JSON)
+    # TODO: Add more validation of input JSON
     if path.exists() and path.stat().st_size > 0:
-        with open(path, "r") as f:
-            local_nodes = json.load(f)
+        try:
+            with open(path, "r") as f:
+                local_nodes = json.load(f)
+        except json.JSONDecodeError:
+            warnings.warn(f"You provided an invalid JSON file at {path}.")
+            local_nodes = []
         if local_nodes:
             if isinstance(local_nodes, list):
                 return {
