@@ -64,7 +64,9 @@ def parse_nodes_as_dict(path: Path) -> dict:
         # We wrap our input in a list if it isn't already to enable
         # easy iteration for adding trailing slashes, even though our
         # file level schema could handle a single non-array input
-        input_nodes = local_nodes if isinstance(local_nodes, list) else [local_nodes]
+        input_nodes = (
+            local_nodes if isinstance(local_nodes, list) else [local_nodes]
+        )
 
         try:
             # We validate the entire file first, checking all nodes together
