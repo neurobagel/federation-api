@@ -12,6 +12,9 @@ from fastapi import HTTPException
 LOCAL_NODE_INDEX_PATH = Path(__file__).parents[2] / "local_nb_nodes.json"
 FEDERATION_NODES = {}
 
+# We use this schema to validate the local_nb_nodes.json file
+# We allow both array type input and a single JSON object
+# Therefore the schema supports both
 LOCAL_NODE_SCHEMA = {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
@@ -72,11 +75,7 @@ def parse_nodes_as_dict(path: Path) -> dict:
         try:
             # We validate the entire file first, checking if all nodes are valid
             validate(instance=input_nodes, schema=LOCAL_NODE_SCHEMA)
-            
-            return {
-                add_trailing_slash(node["ApiURL"]): node["NodeName"]
-                for node in input_nodes
-            }
+            valid_nodes = input_nodes
         except jsonschema.ValidationError: 
             valid_nodes = []
             invalid_nodes = []
@@ -89,13 +88,14 @@ def parse_nodes_as_dict(path: Path) -> dict:
 
             if invalid_nodes:
                 warnings.warn(
-                    f"Some of the nodes in the JSON are invalid: {invalid_nodes}"
+                    f"Some of the nodes in the JSON are invalid:\n{json.dumps(invalid_nodes, indent=2)}"
                 )
-            if valid_nodes:
-                return {
-                    add_trailing_slash(node["ApiURL"]): node["NodeName"]
-                    for node in valid_nodes
-                }
+
+    if valid_nodes:
+        return {
+            add_trailing_slash(node["ApiURL"]): node["NodeName"]
+            for node in valid_nodes
+        }
 
     return {}
 
