@@ -63,10 +63,7 @@ def test_parse_nodes_as_dict(set_nodes, expected_nodes, tmp_path):
     with open(tmp_path / "local_nb_nodes.json", "w") as f:
         f.write(json.dumps(set_nodes, indent=2))
 
-    assert (
-        util.parse_nodes_as_dict(tmp_path / "local_nb_nodes.json")
-        == expected_nodes
-    )
+    assert util.parse_nodes_as_dict(tmp_path / "local_nb_nodes.json") == expected_nodes
 
 
 def test_recognized_query_nodes_do_not_raise_error(monkeypatch):
@@ -140,9 +137,7 @@ def test_unrecognized_query_nodes_raise_error(
         ([], ["https://firstknownnode.org/", "https://secondknownnode.org/"]),
     ],
 )
-def test_validate_query_node_url_list(
-    monkeypatch, raw_url_list, expected_url_list
-):
+def test_validate_query_node_url_list(monkeypatch, raw_url_list, expected_url_list):
     """Test that provided URLs are deduplicated, get a trailing slash, and default to FEDERATION_NODES if none are provided."""
     monkeypatch.setattr(
         util,
@@ -190,9 +185,7 @@ def test_validate_query_node_url_list(
         ),
     ],
 )
-def test_schema_invalid_nodes_raise_warning(
-    set_nodes, expected_nodes, tmp_path
-):
+def test_schema_invalid_nodes_raise_warning(set_nodes, expected_nodes, tmp_path):
     """
     If the JSON is valid but parts of the schema are invalid, expect to raise a warning
     and only return the parts that fit the schema.

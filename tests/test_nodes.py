@@ -65,9 +65,7 @@ def test_failed_public_nodes_fetching_raises_warning(test_app, monkeypatch):
         return {"https://mylocalnode.org/": "Local Node"}
 
     def mock_httpx_get(**kwargs):
-        return httpx.Response(
-            status_code=404, json={}, text="Some error message"
-        )
+        return httpx.Response(status_code=404, json={}, text="Some error message")
 
     monkeypatch.setattr(util, "parse_nodes_as_dict", mock_parse_nodes_as_dict)
     monkeypatch.setattr(httpx, "get", mock_httpx_get)
@@ -75,9 +73,7 @@ def test_failed_public_nodes_fetching_raises_warning(test_app, monkeypatch):
     with pytest.warns(UserWarning) as w:
         with test_app:
             response = test_app.get("/nodes/")
-            assert util.FEDERATION_NODES == {
-                "https://mylocalnode.org/": "Local Node"
-            }
+            assert util.FEDERATION_NODES == {"https://mylocalnode.org/": "Local Node"}
             assert response.json() == [
                 {
                     "NodeName": "Local Node",
@@ -146,22 +142,17 @@ def test_no_available_nodes_raises_error(monkeypatch, test_app):
         return {}
 
     def mock_httpx_get(**kwargs):
-        return httpx.Response(
-            status_code=404, json={}, text="Some error message"
-        )
+        return httpx.Response(status_code=404, json={}, text="Some error message")
 
     monkeypatch.setattr(util, "parse_nodes_as_dict", mock_parse_nodes_as_dict)
     monkeypatch.setattr(httpx, "get", mock_httpx_get)
 
-    with pytest.warns(UserWarning) as w, pytest.raises(
-        RuntimeError
-    ) as exc_info:
+    with pytest.warns(UserWarning) as w, pytest.raises(RuntimeError) as exc_info:
         with test_app:
             pass
 
     # Two warnings are expected, one for the failed GET request for public nodes, and one for the lack of local nodes.
     assert len(w) == 2
-    assert (
-        "No local or public Neurobagel nodes available for federation"
-        in str(exc_info.value)
+    assert "No local or public Neurobagel nodes available for federation" in str(
+        exc_info.value
     )
