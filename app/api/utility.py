@@ -6,8 +6,8 @@ from pathlib import Path
 
 import httpx
 import jsonschema
-from jsonschema import Draft7Validator, validate
 from fastapi import HTTPException
+from jsonschema import Draft7Validator, validate
 
 LOCAL_NODE_INDEX_PATH = Path(__file__).parents[2] / "local_nb_nodes.json"
 FEDERATION_NODES = {}
@@ -16,33 +16,26 @@ FEDERATION_NODES = {}
 # We allow both array type input and a single JSON object
 # Therefore the schema supports both
 LOCAL_NODE_SCHEMA = {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "definitions": {
-    "node": {
-      "type": "object",
-      "properties": {
-        "ApiURL": {
-          "type": "string",
-          "pattern": "^(http|https)://"
-        },
-        "NodeName": {
-          "type": "string"
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "node": {
+            "type": "object",
+            "properties": {
+                "ApiURL": {"type": "string", "pattern": "^(http|https)://"},
+                "NodeName": {"type": "string"},
+            },
+            "required": ["ApiURL", "NodeName"],
+            "additionalProperties": False,
         }
-      },
-      "required": ["ApiURL", "NodeName"],
-      "additionalProperties": False
-    }
-  },
-  "oneOf": [
-    {
-      "type": "array",
-      "items": { "$ref": "#/definitions/node" },
-      "minItems": 1
     },
-    {
-      "$ref": "#/definitions/node"
-    }
-  ]
+    "oneOf": [
+        {
+            "type": "array",
+            "items": {"$ref": "#/definitions/node"},
+            "minItems": 1,
+        },
+        {"$ref": "#/definitions/node"},
+    ],
 }
 validator = Draft7Validator(LOCAL_NODE_SCHEMA)
 
@@ -70,18 +63,23 @@ def parse_nodes_as_dict(path: Path) -> dict:
 
         # We wrap our input in a list if it isn't already to enable easy iteration for adding trailing slashes,
         # even though our file level schema could handle a single non-array input
-        input_nodes = local_nodes if isinstance(local_nodes, list) else [local_nodes]
+        input_nodes = (
+            local_nodes if isinstance(local_nodes, list) else [local_nodes]
+        )
 
         try:
             # We validate the entire file first, checking if all nodes are valid
             validate(instance=input_nodes, schema=LOCAL_NODE_SCHEMA)
             valid_nodes = input_nodes
-        except jsonschema.ValidationError: 
+        except jsonschema.ValidationError:
             valid_nodes = []
             invalid_nodes = []
             for node in input_nodes:
                 try:
-                    validate(instance=node, schema=LOCAL_NODE_SCHEMA["definitions"]["node"])
+                    validate(
+                        instance=node,
+                        schema=LOCAL_NODE_SCHEMA["definitions"]["node"],
+                    )
                     valid_nodes.append(node)
                 except jsonschema.ValidationError:
                     invalid_nodes.append(node)

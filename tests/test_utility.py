@@ -36,9 +36,7 @@ def test_add_trailing_slash(url, expected_url):
                     "NodeName": "firstnode",
                 }
             ],
-            {
-                "http://firstnode.neurobagel.org/query/": "firstnode"
-            },
+            {"http://firstnode.neurobagel.org/query/": "firstnode"},
         ),
         (
             [
@@ -161,21 +159,21 @@ def test_validate_query_node_url_list(
 @pytest.mark.parametrize(
     "set_nodes,expected_nodes",
     [
-            (
-                {
-                    "IMakeMyOwnRules": "http://firstnode.neurobagel.org/query",
-                    "WhatAreSchemas": "firstnode",
-                },
-                {}
-            ),
-            (
-                {
-                    "ApiURL": "this.is.not.a.url",
-                    "NodeName": "firstnode",
-                },
-                {}
-            ),
-            (
+        (
+            {
+                "IMakeMyOwnRules": "http://firstnode.neurobagel.org/query",
+                "WhatAreSchemas": "firstnode",
+            },
+            {},
+        ),
+        (
+            {
+                "ApiURL": "this.is.not.a.url",
+                "NodeName": "firstnode",
+            },
+            {},
+        ),
+        (
             [
                 {
                     "ApiURL": "https://firstnode.neurobagel.org/query/",
@@ -188,11 +186,13 @@ def test_validate_query_node_url_list(
             ],
             {
                 "https://firstnode.neurobagel.org/query/": "firstnode",
-            }
-            )
+            },
+        ),
     ],
 )
-def test_schema_invalid_nodes_raise_warning(set_nodes, expected_nodes, tmp_path):
+def test_schema_invalid_nodes_raise_warning(
+    set_nodes, expected_nodes, tmp_path
+):
     """
     If the JSON is valid but parts of the schema are invalid, expect to raise a warning
     and only return the parts that fit the schema.
@@ -201,18 +201,20 @@ def test_schema_invalid_nodes_raise_warning(set_nodes, expected_nodes, tmp_path)
     # First create a temporary input config file for the test to read
     with open(tmp_path / "local_nb_nodes.json", "w") as f:
         f.write(json.dumps(set_nodes, indent=2))
-        
-    with pytest.warns(UserWarning, match=r"Some of the nodes in the JSON are invalid.*"):
+
+    with pytest.warns(
+        UserWarning, match=r"Some of the nodes in the JSON are invalid.*"
+    ):
         nodes = util.parse_nodes_as_dict(tmp_path / "local_nb_nodes.json")
-        
+
     assert nodes == expected_nodes
 
 
 def test_invalid_json_raises_warning(tmp_path):
     """Ensure that an invalid JSON file raises a warning but doesn't crash the app."""
-    
+
     with open(tmp_path / "local_nb_nodes.json", "w") as f:
         f.write("this is not valid JSON")
-        
+
     with pytest.warns(UserWarning, match="You provided an invalid JSON"):
         nodes = util.parse_nodes_as_dict(tmp_path / "local_nb_nodes.json")
