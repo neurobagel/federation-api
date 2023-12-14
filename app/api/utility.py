@@ -55,7 +55,7 @@ def parse_nodes_as_dict(path: Path) -> dict:
     """
     Reads names and URLs of user-defined Neurobagel nodes from a JSON file (if available) and stores them in a dict
     where the keys are the node URLs, and the values are the node names.
-    Makes sure node URLs end with a slash.
+    Makes sure node URLs end with a slash and only valid nodes are returned.
     """
     if path.exists() and path.stat().st_size > 0:
         try:
@@ -65,21 +65,33 @@ def parse_nodes_as_dict(path: Path) -> dict:
             warnings.warn(f"You provided an invalid JSON file at {path}.")
             local_nodes = []
 
+        # We wrap our input in a list if it isn't already to enable easy iteration for adding trailing slashes,
+        # even though our file level schema could handle a single non-array input
         input_nodes = local_nodes if isinstance(local_nodes, list) else [local_nodes]
-        valid_nodes = []
-        invalid_nodes = []
-        for node in input_nodes:
-            try:
-                validate(instance=node, schema=LOCAL_NODE_SCHEMA["definitions"]["node"])
-                valid_nodes.append(node)
-            except jsonschema.ValidationError:
-                invalid_nodes.append(node)
 
-        if invalid_nodes:
-            warnings.warn(
-                f"Some of the nodes in the JSON are invalid: {invalid_nodes}"
-            )
-        if valid_nodes:
+        try:
+            # We validate the entire file first, checking if all nodes are valid
+            validate(instance=input_nodes, schema=LOCAL_NODE_SCHEMA)
+            
+            return {
+                add_trailing_slash(node["ApiURL"]): node["NodeName"]
+                for node in input_nodes
+            }
+        except jsonschema.ValidationError: 
+            valid_nodes = []
+            invalid_nodes = []
+            for node in input_nodes:
+                try:
+                    validate(instance=node, schema=LOCAL_NODE_SCHEMA["definitions"]["node"])
+                    valid_nodes.append(node)
+                except jsonschema.ValidationError:
+                    invalid_nodes.append(node)
+
+            if invalid_nodes:
+                warnings.warn(
+                    f"Some of the nodes in the JSON are invalid: {invalid_nodes}"
+                )
+            if valid_nodes:
                 return {
                     add_trailing_slash(node["ApiURL"]): node["NodeName"]
                     for node in valid_nodes
