@@ -32,6 +32,17 @@ def test_add_trailing_slash(url, expected_url):
         (
             [
                 {
+                    "ApiURL": "http://firstnode.neurobagel.org/query",
+                    "NodeName": "firstnode",
+                }
+            ],
+            {
+                "http://firstnode.neurobagel.org/query/": "firstnode"
+            },
+        ),
+        (
+            [
+                {
                     "ApiURL": "https://firstnode.neurobagel.org/query/",
                     "NodeName": "firstnode",
                 },
@@ -152,8 +163,8 @@ def test_validate_query_node_url_list(
     [
             (
                 {
-                "IMakeMyOwnRules": "http://firstnode.neurobagel.org/query",
-                "WhatAreSchemas": "firstnode",
+                    "IMakeMyOwnRules": "http://firstnode.neurobagel.org/query",
+                    "WhatAreSchemas": "firstnode",
                 },
                 {}
             ),
