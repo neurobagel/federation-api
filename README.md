@@ -25,7 +25,7 @@ Examples:
     "ApiURL": "http://host.docker.internal:8000"
 }
 ```
-_**NOTE:** If the local node API(s) you are federating over is running on the same host machine as the federation API (e.g., the node API itself is accessible at `http://localhost:XXXX`), in `local_nb_nodes.json` you **must** replace `localhost` with `host.docker.internal` in the local node's `"ApiURL"`, as shown above._
+_**NOTE:** If the local node API(s) you are federating over is running on the same host machine as the federation API (e.g., the URL to access the node API is `http://localhost:XXXX`), in `local_nb_nodes.json` you **must** replace `localhost` with `host.docker.internal` in the corresponding `"ApiURL"`, as shown above._
 
 `local_nb_nodes.json` with two local nodes
 ```json
