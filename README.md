@@ -18,24 +18,25 @@ This repo contains a [template `local_nb_nodes.json`](/local_nb_nodes.json) file
 
 Examples:  
 
-`local_nb_nodes.json` with one local node
+`local_nb_nodes.json` with one local node API running on `http://localhost:8000`
 ```json
 {
-    "NodeName": "First Node",
-    "ApiURL": "https://firstnode.org"
+    "NodeName": "Local graph",
+    "ApiURL": "http://host.docker.internal:8000"
 }
 ```
+_**NOTE:** If the local node API(s) you are federating over is running on the same host machine as the federation API (e.g., the node API itself is accessible at `http://localhost:XXXX`), in `local_nb_nodes.json` you **must** replace `localhost` with `host.docker.internal` in the local node's `"ApiURL"`, as shown above._
 
 `local_nb_nodes.json` with two local nodes
 ```json
 [
     {
-        "NodeName": "First Node",
-        "ApiURL": "https://firstnode.org"
+        "NodeName": "Local graph 1",
+        "ApiURL": "http://host.docker.internal:8000"
     },
     {
-        "NodeName": "Second Node",
-        "ApiURL": "https://secondnode.org"
+        "NodeName": "Local graph 2",
+        "ApiURL": "http://192.168.0.1"
     }
 ]
 ```
@@ -46,6 +47,7 @@ docker pull neurobagel/federation_api
 
 # Run this next command in the same directory where your `local_nb_nodes.json` file is located
 docker run -d -v ${PWD}/local_nb_nodes.json:/usr/src/local_nb_nodes.json:ro \
+    --add-host=host.docker.internal:host-gateway \
     --name=federation -p 8080:8000 neurobagel/federation_api
 ```
 NOTE: You can replace the port number `8080` for the `-p` flag with any port on the host you wish to use for the API.
