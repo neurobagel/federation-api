@@ -14,7 +14,8 @@ Create a configuration JSON file called `local_nb_nodes.json` containing the URL
 Each node must be denoted by a dictionary `{}` with two key-value pairs: `"NodeName"` for the name of the node, and `"ApiURL"` for the url of the API exposed for that node. 
 Multiple nodes must be wrapped in a list `[]`.
 
-This repo contains a [template `local_nb_nodes.json`](/local_nb_nodes.json) file that you can edit.
+For a template `local_nb_nodes.json` file that you can clone and edit, 
+see the [neurobagel/recipes](https://github.com/neurobagel/recipes/tree/main/local_federation) repo.
 
 Examples:  
 
