@@ -10,6 +10,8 @@ from fastapi import HTTPException
 from jsonschema import validate
 
 LOCAL_NODE_INDEX_PATH = Path(__file__).parents[2] / "local_nb_nodes.json"
+
+# Stores the names and URLs of all Neurobagel nodes known to the API instance, in the form of {node_url: node_name, ...}
 FEDERATION_NODES = {}
 
 # We use this schema to validate the local_nb_nodes.json file
