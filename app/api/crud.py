@@ -1,5 +1,9 @@
 """CRUD functions called by path operations."""
 
+import warnings
+
+from fastapi import HTTPException, status
+
 from . import utility as util
 
 
@@ -13,7 +17,7 @@ async def get(
     assessment: str,
     image_modal: str,
     node_urls: list[str],
-):
+) -> list[dict] | dict:
     """
     Makes GET requests to one or more Neurobagel node APIs using send_get_request utility function where the parameters are Neurobagel query parameters.
 
@@ -45,8 +49,10 @@ async def get(
 
     """
     cross_node_results = []
+    node_errors = []
 
     node_urls = util.validate_query_node_url_list(node_urls)
+    total_nodes = len(node_urls)
 
     # Node API query parameters
     params = {}
@@ -67,14 +73,42 @@ async def get(
     if image_modal:
         params["image_modal"] = image_modal
 
+    # TODO: make the requests asynchronous using asyncio and asyncio.gather, see also https://www.python-httpx.org/async/
     for node_url in node_urls:
         node_name = util.FEDERATION_NODES[node_url]
-        response = util.send_get_request(node_url + "query/", params)
 
-        for result in response:
-            result["node_name"] = node_name
+        try:
+            response = util.send_get_request(node_url + "query/", params)
 
-        cross_node_results += response
+            for result in response:
+                result["node_name"] = node_name
+
+            cross_node_results += response
+        except HTTPException as e:
+            node_errors.append({"NodeName": node_url, "error": e.detail})
+
+            warnings.warn(
+                f"Query to node {node_name} ({node_url}) did not succeed: {e.detail}"
+            )
+
+    if not node_errors:
+        # TODO: Use logger instead of print, see https://github.com/tiangolo/fastapi/issues/5003
+        print(
+            f"All nodes were queried successfully ({total_nodes/total_nodes})."
+        )
+    elif len(node_errors) < total_nodes:
+        failed_node_names = [
+            node_error["NodeName"] for node_error in node_errors
+        ]
+        print(
+            f"Queries to {len(failed_node_names)}/{total_nodes} nodes failed: {failed_node_names}."
+        )
+
+        raise HTTPException(
+            status_code=status.HTTP_207_MULTI_STATUS,
+            detail={"errors": node_errors, "responses": cross_node_results},
+        )
+    # TODO: Handle case when all nodes fail
 
     return cross_node_results
 
