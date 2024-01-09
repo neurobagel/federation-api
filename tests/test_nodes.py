@@ -1,6 +1,8 @@
 import httpx
 import pytest
+from fastapi import HTTPException, status
 
+from app.api import crud
 from app.api import utility as util
 
 
@@ -165,3 +167,88 @@ def test_no_available_nodes_raises_error(monkeypatch, test_app):
         "No local or public Neurobagel nodes available for federation"
         in str(exc_info.value)
     )
+
+
+def test_partial_node_failures_are_handled_gracefully(monkeypatch, test_app):
+    """
+    Test that when queries to some nodes result in errors, the overall API get request still succeeds,
+    and that the successful responses are returned along with a list of the encountered errors.
+    """
+    monkeypatch.setattr(
+        util,
+        "FEDERATION_NODES",
+        {
+            "https://firstpublicnode.org/": "First Public Node",
+            "https://secondpublicnode.org/": "Second Public Node",
+        },
+    )
+
+    async def mock_partially_successful_get(
+        min_age,
+        max_age,
+        sex,
+        diagnosis,
+        is_control,
+        min_num_sessions,
+        assessment,
+        image_modal,
+        node_urls,
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_207_MULTI_STATUS,
+            detail={
+                "errors": [
+                    {
+                        "NodeName": "Second Public Node",
+                        "error": "500 Server Error: Internal Server Error",
+                    },
+                ],
+                "responses": [
+                    {
+                        "dataset_uuid": "http://neurobagel.org/vocab/12345",
+                        "dataset_name": "QPN",
+                        "dataset_portal_uri": "https://rpq-qpn.ca/en/researchers-section/databases/",
+                        "dataset_total_subjects": 200,
+                        "num_matching_subjects": 5,
+                        "records_protected": True,
+                        "subject_data": "protected",
+                        "image_modals": [
+                            "http://purl.org/nidash/nidm#T1Weighted",
+                            "http://purl.org/nidash/nidm#T2Weighted",
+                        ],
+                        "node_name": "First Public Node",
+                    },
+                ],
+            },
+        )
+
+    monkeypatch.setattr(crud, "get", mock_partially_successful_get)
+    response = test_app.get("/query/")
+
+    assert response.is_success
+    assert response.json() == {
+        "detail": {
+            "errors": [
+                {
+                    "NodeName": "Second Public Node",
+                    "error": "500 Server Error: Internal Server Error",
+                },
+            ],
+            "responses": [
+                {
+                    "dataset_uuid": "http://neurobagel.org/vocab/12345",
+                    "dataset_name": "QPN",
+                    "dataset_portal_uri": "https://rpq-qpn.ca/en/researchers-section/databases/",
+                    "dataset_total_subjects": 200,
+                    "num_matching_subjects": 5,
+                    "records_protected": True,
+                    "subject_data": "protected",
+                    "image_modals": [
+                        "http://purl.org/nidash/nidm#T1Weighted",
+                        "http://purl.org/nidash/nidm#T2Weighted",
+                    ],
+                    "node_name": "First Public Node",
+                },
+            ],
+        }
+    }
