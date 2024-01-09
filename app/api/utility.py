@@ -220,6 +220,7 @@ def send_get_request(url: str, params: list):
     HTTPException
         _description_
     """
+    # TODO: Handle case when request fails
     response = httpx.get(
         url=url,
         params=params,

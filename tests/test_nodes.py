@@ -2,7 +2,6 @@ import httpx
 import pytest
 from fastapi import HTTPException, status
 
-from app.api import crud
 from app.api import utility as util
 
 
@@ -169,10 +168,13 @@ def test_no_available_nodes_raises_error(monkeypatch, test_app):
     )
 
 
-def test_partial_node_failures_are_handled_gracefully(monkeypatch, test_app):
+def test_partial_node_failures_are_handled_gracefully(
+    monkeypatch, test_app, capsys
+):
     """
-    Test that when queries to some nodes result in errors, the overall API get request still succeeds,
-    and that the successful responses are returned along with a list of the encountered errors.
+    Test that when queries to some nodes return errors, the overall API get request still succeeds,
+    the successful responses are returned along with a list of the encountered errors,
+    and the failed nodes are logged to the console.
     """
     monkeypatch.setattr(
         util,
@@ -183,47 +185,37 @@ def test_partial_node_failures_are_handled_gracefully(monkeypatch, test_app):
         },
     )
 
-    async def mock_partially_successful_get(
-        min_age,
-        max_age,
-        sex,
-        diagnosis,
-        is_control,
-        min_num_sessions,
-        assessment,
-        image_modal,
-        node_urls,
-    ):
+    def mock_send_get_request(url, params):
+        if url == "https://firstpublicnode.org/query/":
+            return [
+                {
+                    "dataset_uuid": "http://neurobagel.org/vocab/12345",
+                    "dataset_name": "QPN",
+                    "dataset_portal_uri": "https://rpq-qpn.ca/en/researchers-section/databases/",
+                    "dataset_total_subjects": 200,
+                    "num_matching_subjects": 5,
+                    "records_protected": True,
+                    "subject_data": "protected",
+                    "image_modals": [
+                        "http://purl.org/nidash/nidm#T1Weighted",
+                        "http://purl.org/nidash/nidm#T2Weighted",
+                    ],
+                },
+            ]
+
         raise HTTPException(
-            status_code=status.HTTP_207_MULTI_STATUS,
-            detail={
-                "errors": [
-                    {
-                        "NodeName": "Second Public Node",
-                        "error": "500 Server Error: Internal Server Error",
-                    },
-                ],
-                "responses": [
-                    {
-                        "dataset_uuid": "http://neurobagel.org/vocab/12345",
-                        "dataset_name": "QPN",
-                        "dataset_portal_uri": "https://rpq-qpn.ca/en/researchers-section/databases/",
-                        "dataset_total_subjects": 200,
-                        "num_matching_subjects": 5,
-                        "records_protected": True,
-                        "subject_data": "protected",
-                        "image_modals": [
-                            "http://purl.org/nidash/nidm#T1Weighted",
-                            "http://purl.org/nidash/nidm#T2Weighted",
-                        ],
-                        "node_name": "First Public Node",
-                    },
-                ],
-            },
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="500 Server Error: Internal Server Error",
         )
 
-    monkeypatch.setattr(crud, "get", mock_partially_successful_get)
-    response = test_app.get("/query/")
+    monkeypatch.setattr(util, "send_get_request", mock_send_get_request)
+
+    with pytest.warns(
+        UserWarning,
+        match=r"Second Public Node \(https://secondpublicnode.org/\) did not succeed",
+    ):
+        response = test_app.get("/query/")
+        captured = capsys.readouterr()
 
     assert response.is_success
     assert response.json() == {
@@ -252,3 +244,6 @@ def test_partial_node_failures_are_handled_gracefully(monkeypatch, test_app):
             ],
         }
     }
+    assert (
+        "Queries to 1/2 nodes failed: ['Second Public Node']" in captured.out
+    )

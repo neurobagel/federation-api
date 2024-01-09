@@ -85,7 +85,7 @@ async def get(
 
             cross_node_results += response
         except HTTPException as e:
-            node_errors.append({"NodeName": node_url, "error": e.detail})
+            node_errors.append({"NodeName": node_name, "error": e.detail})
 
             warnings.warn(
                 f"Query to node {node_name} ({node_url}) did not succeed: {e.detail}"
