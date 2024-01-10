@@ -92,32 +92,37 @@ async def get(
                 f"Query to node {node_name} ({node_url}) did not succeed: {e.detail}"
             )
 
-    if not node_errors:
+    if node_errors:
         # TODO: Use logger instead of print, see https://github.com/tiangolo/fastapi/issues/5003
         print(
-            f"All nodes were queried successfully ({total_nodes/total_nodes})."
-        )
-    elif len(node_errors) < total_nodes:
-        failed_node_names = [
-            node_error["NodeName"] for node_error in node_errors
-        ]
-        print(
-            f"Queries to {len(failed_node_names)}/{total_nodes} nodes failed: {failed_node_names}."
+            f"Queries to {len(node_errors)}/{total_nodes} nodes failed: {[node_error['NodeName'] for node_error in node_errors]}."
         )
 
-        # See https://fastapi.tiangolo.com/advanced/additional-responses/ for more info
+        if len(node_errors) == total_nodes:
+            # See https://fastapi.tiangolo.com/advanced/additional-responses/ for more info
+            return JSONResponse(
+                status_code=status.HTTP_207_MULTI_STATUS,
+                content={
+                    "errors": node_errors,
+                    "responses": cross_node_results,
+                    "nodes_response_status": "fail",
+                },
+            )
         return JSONResponse(
             status_code=status.HTTP_207_MULTI_STATUS,
             content={
                 "errors": node_errors,
                 "responses": cross_node_results,
-                "status": "partial success",
+                "nodes_response_status": "partial success",
             },
         )
 
-    # TODO: Handle case when all nodes fail
-
-    return cross_node_results
+    print(f"All nodes were queried successfully ({total_nodes/total_nodes}).")
+    return {
+        "errors": node_errors,
+        "responses": cross_node_results,
+        "nodes_response_status": "success",
+    }
 
 
 async def get_terms(data_element_URI: str):
