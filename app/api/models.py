@@ -1,4 +1,5 @@
 """Data models."""
+from enum import Enum
 from typing import Optional, Union
 
 from fastapi import Query
@@ -38,9 +39,17 @@ class CohortQueryResponse(BaseModel):
     image_modals: list
 
 
+class NodesResponseStatus(str, Enum):
+    """Possible values for the status of the responses from the queried nodes."""
+
+    SUCCESS = "success"
+    PARTIAL_SUCCESS = "partial success"
+    FAIL = "fail"
+
+
 class CombinedQueryResponse(BaseModel):
     """Data model for the combined query results of all matching datasets across all queried nodes."""
 
     errors: list
     responses: list[CohortQueryResponse]
-    nodes_response_status: str
+    nodes_response_status: NodesResponseStatus
