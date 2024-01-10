@@ -6,7 +6,7 @@ from pathlib import Path
 
 import httpx
 import jsonschema
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 from jsonschema import validate
 
 LOCAL_NODE_INDEX_PATH = Path(__file__).parents[2] / "local_nb_nodes.json"
@@ -220,20 +220,25 @@ def send_get_request(url: str, params: list):
     HTTPException
         _description_
     """
-    # TODO: Handle case when request fails
-    response = httpx.get(
-        url=url,
-        params=params,
-        # TODO: Revisit timeout value when query performance is improved
-        timeout=30.0,
-        # Enable redirect following (off by default) so
-        # APIs behind a proxy can be reached
-        follow_redirects=True,
-    )
-
-    if not response.is_success:
-        raise HTTPException(
-            status_code=response.status_code,
-            detail=f"{response.reason_phrase}: {response.text}",
+    try:
+        response = httpx.get(
+            url=url,
+            params=params,
+            # TODO: Revisit timeout value when query performance is improved
+            timeout=30.0,
+            # Enable redirect following (off by default) so
+            # APIs behind a proxy can be reached
+            follow_redirects=True,
         )
-    return response.json()
+
+        if not response.is_success:
+            raise HTTPException(
+                status_code=response.status_code,
+                detail=f"{response.reason_phrase}: {response.text}",
+            )
+        return response.json()
+    except httpx.NetworkError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Request failed due to a network error or because the node API cannot be reached: {exc}",
+        ) from exc
