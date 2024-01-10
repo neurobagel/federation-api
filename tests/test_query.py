@@ -62,7 +62,7 @@ def test_partial_node_failure_responses_handled_gracefully(
     assert response.json() == {
         "errors": [
             {
-                "NodeName": "Second Public Node",
+                "node_name": "Second Public Node",
                 "error": "Internal Server Error: Some internal server error",
             },
         ],
@@ -116,7 +116,7 @@ def test_partial_node_connection_failures_handled_gracefully(
     assert response.json() == {
         "errors": [
             {
-                "NodeName": "Second Public Node",
+                "node_name": "Second Public Node",
                 "error": "Request failed due to a network error or because the node API cannot be reached: Some connection error",
             },
         ],

@@ -86,7 +86,7 @@ async def get(
 
             cross_node_results += response
         except HTTPException as e:
-            node_errors.append({"NodeName": node_name, "error": e.detail})
+            node_errors.append({"node_name": node_name, "error": e.detail})
 
             warnings.warn(
                 f"Query to node {node_name} ({node_url}) did not succeed: {e.detail}"
@@ -95,7 +95,7 @@ async def get(
     if node_errors:
         # TODO: Use logger instead of print, see https://github.com/tiangolo/fastapi/issues/5003
         print(
-            f"Queries to {len(node_errors)}/{total_nodes} nodes failed: {[node_error['NodeName'] for node_error in node_errors]}."
+            f"Queries to {len(node_errors)}/{total_nodes} nodes failed: {[node_error['node_name'] for node_error in node_errors]}."
         )
 
         if len(node_errors) == total_nodes:

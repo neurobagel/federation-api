@@ -47,9 +47,16 @@ class NodesResponseStatus(str, Enum):
     FAIL = "fail"
 
 
+class NodeError(BaseModel):
+    """Data model for an error encountered when querying a node."""
+
+    node_name: str
+    error: str
+
+
 class CombinedQueryResponse(BaseModel):
     """Data model for the combined query results of all matching datasets across all queried nodes."""
 
-    errors: list
+    errors: list[NodeError]
     responses: list[CohortQueryResponse]
     nodes_response_status: NodesResponseStatus
