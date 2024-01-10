@@ -36,3 +36,11 @@ class CohortQueryResponse(BaseModel):
     num_matching_subjects: int
     subject_data: Union[list[dict], str]
     image_modals: list
+
+
+class CombinedQueryResponse(BaseModel):
+    """Data model for the combined query results of all matching datasets across all queried nodes."""
+
+    errors: list
+    responses: list[CohortQueryResponse]
+    status: str
