@@ -23,7 +23,7 @@ def test_single_matching_dataset_result():
     }
 
 
-def test_partial_node_failure_responses_are_handled_gracefully(
+def test_partial_node_failure_responses_handled_gracefully(
     monkeypatch, test_app, capsys, test_single_matching_dataset_result
 ):
     """
@@ -79,7 +79,7 @@ def test_partial_node_failure_responses_are_handled_gracefully(
     )
 
 
-def test_partial_node_connection_failures_are_handled_gracefully(
+def test_partial_node_connection_failures_handled_gracefully(
     monkeypatch, test_app, capsys, test_single_matching_dataset_result
 ):
     """
@@ -132,4 +132,40 @@ def test_partial_node_connection_failures_are_handled_gracefully(
         "Queries to 1/2 nodes failed: ['Second Public Node']" in captured.out
     )
 
-    # TODO: test for all nodes failed, or succeeded
+
+def test_all_nodes_failure_handled_gracefully(monkeypatch, test_app, capsys):
+    """
+    Test that when queries sent to all nodes fail, the federation API get request still succeeds,
+    but includes an overall failure status and all encountered errors in the response.
+    """
+    monkeypatch.setattr(
+        util,
+        "FEDERATION_NODES",
+        {
+            "https://firstpublicnode.org/": "First Public Node",
+            "https://secondpublicnode.org/": "Second Public Node",
+        },
+    )
+
+    def mock_httpx_get(**kwargs):
+        raise httpx.ConnectError("Some connection error")
+
+    monkeypatch.setattr(httpx, "get", mock_httpx_get)
+
+    with pytest.warns(
+        UserWarning,
+    ) as w:
+        response = test_app.get("/query/")
+        captured = capsys.readouterr()
+
+    assert len(w) == 2
+    assert response.status_code == status.HTTP_207_MULTI_STATUS
+
+    response = response.json()
+    assert response["nodes_response_status"] == "fail"
+    assert len(response["errors"]) == 2
+    assert response["responses"] == []
+    assert (
+        "Queries to 2/2 nodes failed: ['First Public Node', 'Second Public Node']"
+        in captured.out
+    )
