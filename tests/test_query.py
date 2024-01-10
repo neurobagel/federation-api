@@ -169,3 +169,37 @@ def test_all_nodes_failure_handled_gracefully(monkeypatch, test_app, capsys):
         "Queries to 2/2 nodes failed: ['First Public Node', 'Second Public Node']"
         in captured.out
     )
+
+
+def test_all_nodes_success_handled_gracefully(
+    monkeypatch, test_app, capsys, test_single_matching_dataset_result
+):
+    """
+    Test that when queries sent to all nodes succeed, the federation API response includes an overall success status and no errors.
+    """
+    monkeypatch.setattr(
+        util,
+        "FEDERATION_NODES",
+        {
+            "https://firstpublicnode.org/": "First Public Node",
+            "https://secondpublicnode.org/": "Second Public Node",
+        },
+    )
+
+    def mock_httpx_get(**kwargs):
+        return httpx.Response(
+            status_code=200, json=[test_single_matching_dataset_result]
+        )
+
+    monkeypatch.setattr(httpx, "get", mock_httpx_get)
+
+    response = test_app.get("/query/")
+    captured = capsys.readouterr()
+
+    assert response.status_code == status.HTTP_200_OK
+
+    response = response.json()
+    assert response["nodes_response_status"] == "success"
+    assert response["errors"] == []
+    assert len(response["responses"]) == 2
+    assert "All nodes queried successfully" in captured.out
