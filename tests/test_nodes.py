@@ -217,32 +217,31 @@ def test_partial_node_failures_are_handled_gracefully(
         response = test_app.get("/query/")
         captured = capsys.readouterr()
 
-    assert response.is_success
+    assert response.status_code == status.HTTP_207_MULTI_STATUS
     assert response.json() == {
-        "detail": {
-            "errors": [
-                {
-                    "NodeName": "Second Public Node",
-                    "error": "500 Server Error: Internal Server Error",
-                },
-            ],
-            "responses": [
-                {
-                    "dataset_uuid": "http://neurobagel.org/vocab/12345",
-                    "dataset_name": "QPN",
-                    "dataset_portal_uri": "https://rpq-qpn.ca/en/researchers-section/databases/",
-                    "dataset_total_subjects": 200,
-                    "num_matching_subjects": 5,
-                    "records_protected": True,
-                    "subject_data": "protected",
-                    "image_modals": [
-                        "http://purl.org/nidash/nidm#T1Weighted",
-                        "http://purl.org/nidash/nidm#T2Weighted",
-                    ],
-                    "node_name": "First Public Node",
-                },
-            ],
-        }
+        "errors": [
+            {
+                "NodeName": "Second Public Node",
+                "error": "500 Server Error: Internal Server Error",
+            },
+        ],
+        "responses": [
+            {
+                "dataset_uuid": "http://neurobagel.org/vocab/12345",
+                "dataset_name": "QPN",
+                "dataset_portal_uri": "https://rpq-qpn.ca/en/researchers-section/databases/",
+                "dataset_total_subjects": 200,
+                "num_matching_subjects": 5,
+                "records_protected": True,
+                "subject_data": "protected",
+                "image_modals": [
+                    "http://purl.org/nidash/nidm#T1Weighted",
+                    "http://purl.org/nidash/nidm#T2Weighted",
+                ],
+                "node_name": "First Public Node",
+            },
+        ],
+        "status": "partial success",
     }
     assert (
         "Queries to 1/2 nodes failed: ['Second Public Node']" in captured.out

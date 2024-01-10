@@ -3,6 +3,7 @@
 import warnings
 
 from fastapi import HTTPException, status
+from fastapi.responses import JSONResponse
 
 from . import utility as util
 
@@ -104,10 +105,16 @@ async def get(
             f"Queries to {len(failed_node_names)}/{total_nodes} nodes failed: {failed_node_names}."
         )
 
-        raise HTTPException(
+        # See https://fastapi.tiangolo.com/advanced/additional-responses/ for more info
+        return JSONResponse(
             status_code=status.HTTP_207_MULTI_STATUS,
-            detail={"errors": node_errors, "responses": cross_node_results},
+            content={
+                "errors": node_errors,
+                "responses": cross_node_results,
+                "status": "partial success",
+            },
         )
+
     # TODO: Handle case when all nodes fail
 
     return cross_node_results
