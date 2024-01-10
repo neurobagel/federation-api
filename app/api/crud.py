@@ -18,7 +18,7 @@ async def get(
     assessment: str,
     image_modal: str,
     node_urls: list[str],
-) -> list[dict] | dict:
+) -> dict:
     """
     Makes GET requests to one or more Neurobagel node APIs using send_get_request utility function where the parameters are Neurobagel query parameters.
 
@@ -117,7 +117,7 @@ async def get(
             },
         )
 
-    print(f"All nodes were queried successfully ({total_nodes/total_nodes}).")
+    print(f"All nodes queried successfully ({total_nodes/total_nodes}).")
     return {
         "errors": node_errors,
         "responses": cross_node_results,
@@ -126,6 +126,7 @@ async def get(
 
 
 async def get_terms(data_element_URI: str):
+    # TODO: Make this path able to handle partial successes as well
     """
     Makes a GET request to one or more Neurobagel node APIs using send_get_request utility function where the only parameter is a data element URI.
 
