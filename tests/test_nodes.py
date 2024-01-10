@@ -241,7 +241,7 @@ def test_partial_node_failures_are_handled_gracefully(
                 "node_name": "First Public Node",
             },
         ],
-        "status": "partial success",
+        "nodes_response_status": "partial success",
     }
     assert (
         "Queries to 1/2 nodes failed: ['Second Public Node']" in captured.out

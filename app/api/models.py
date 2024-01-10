@@ -43,4 +43,4 @@ class CombinedQueryResponse(BaseModel):
 
     errors: list
     responses: list[CohortQueryResponse]
-    status: str
+    nodes_response_status: str
