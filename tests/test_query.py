@@ -39,7 +39,7 @@ def test_partial_node_failure_responses_handled_gracefully(
         },
     )
 
-    def mock_httpx_get(**kwargs):
+    async def mock_httpx_get(self, **kwargs):
         if kwargs["url"] == "https://firstpublicnode.org/query/":
             return httpx.Response(
                 status_code=200, json=[test_single_matching_dataset_result]
@@ -49,7 +49,7 @@ def test_partial_node_failure_responses_handled_gracefully(
             status_code=500, json={}, text="Some internal server error"
         )
 
-    monkeypatch.setattr(httpx, "get", mock_httpx_get)
+    monkeypatch.setattr(httpx.AsyncClient, "get", mock_httpx_get)
 
     with pytest.warns(
         UserWarning,
@@ -95,7 +95,7 @@ def test_partial_node_connection_failures_handled_gracefully(
         },
     )
 
-    def mock_httpx_get(**kwargs):
+    async def mock_httpx_get(self, **kwargs):
         if kwargs["url"] == "https://firstpublicnode.org/query/":
             return httpx.Response(
                 status_code=200, json=[test_single_matching_dataset_result]
@@ -103,7 +103,7 @@ def test_partial_node_connection_failures_handled_gracefully(
 
         raise httpx.ConnectError("Some connection error")
 
-    monkeypatch.setattr(httpx, "get", mock_httpx_get)
+    monkeypatch.setattr(httpx.AsyncClient, "get", mock_httpx_get)
 
     with pytest.warns(
         UserWarning,
@@ -147,10 +147,10 @@ def test_all_nodes_failure_handled_gracefully(monkeypatch, test_app, capsys):
         },
     )
 
-    def mock_httpx_get(**kwargs):
+    async def mock_httpx_get(self, **kwargs):
         raise httpx.ConnectError("Some connection error")
 
-    monkeypatch.setattr(httpx, "get", mock_httpx_get)
+    monkeypatch.setattr(httpx.AsyncClient, "get", mock_httpx_get)
 
     with pytest.warns(
         UserWarning,
@@ -186,12 +186,12 @@ def test_all_nodes_success_handled_gracefully(
         },
     )
 
-    def mock_httpx_get(**kwargs):
+    async def mock_httpx_get(self, **kwargs):
         return httpx.Response(
             status_code=200, json=[test_single_matching_dataset_result]
         )
 
-    monkeypatch.setattr(httpx, "get", mock_httpx_get)
+    monkeypatch.setattr(httpx.AsyncClient, "get", mock_httpx_get)
 
     response = test_app.get("/query/")
     captured = capsys.readouterr()
