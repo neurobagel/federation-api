@@ -198,7 +198,7 @@ def validate_query_node_url_list(node_urls: list) -> list:
     return node_urls
 
 
-async def send_get_request(url: str, params: list):
+async def send_get_request(url: str, params: list) -> dict:
     """
     Makes a GET request to one or more Neurobagel nodes.
 
