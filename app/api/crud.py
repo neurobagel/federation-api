@@ -1,5 +1,6 @@
 """CRUD functions called by path operations."""
 
+import asyncio
 import warnings
 
 from fastapi import HTTPException, status
@@ -74,23 +75,25 @@ async def get(
     if image_modal:
         params["image_modal"] = image_modal
 
-    # TODO: make the requests asynchronous using asyncio and asyncio.gather, see also https://www.python-httpx.org/async/
-    for node_url in node_urls:
+    tasks = [
+        util.send_get_request(node_url + "query/", params)
+        for node_url in node_urls
+    ]
+    responses = await asyncio.gather(*tasks, return_exceptions=True)
+
+    for node_url, response in zip(node_urls, responses):
         node_name = util.FEDERATION_NODES[node_url]
-
-        try:
-            response = util.send_get_request(node_url + "query/", params)
-
+        if isinstance(response, HTTPException):
+            node_errors.append(
+                {"node_name": node_name, "error": response.detail}
+            )
+            warnings.warn(
+                f"Query to node {node_name} ({node_url}) did not succeed: {response.detail}"
+            )
+        else:
             for result in response:
                 result["node_name"] = node_name
-
             cross_node_results += response
-        except HTTPException as e:
-            node_errors.append({"node_name": node_name, "error": e.detail})
-
-            warnings.warn(
-                f"Query to node {node_name} ({node_url}) did not succeed: {e.detail}"
-            )
 
     if node_errors:
         # TODO: Use logger instead of print, see https://github.com/tiangolo/fastapi/issues/5003
