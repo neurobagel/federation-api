@@ -93,7 +93,7 @@ async def get(
         else:
             for result in response:
                 result["node_name"] = node_name
-            cross_node_results += response
+            cross_node_results.extend(response)
 
     if node_errors:
         # TODO: Use logger instead of print, see https://github.com/tiangolo/fastapi/issues/5003

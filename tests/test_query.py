@@ -6,7 +6,7 @@ from app.api import utility as util
 
 
 @pytest.fixture()
-def test_single_matching_dataset_result():
+def mocked_single_matching_dataset_result():
     """Valid aggregate query result for a single matching dataset."""
     return {
         "dataset_uuid": "http://neurobagel.org/vocab/12345",
