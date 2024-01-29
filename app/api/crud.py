@@ -125,7 +125,7 @@ async def get(
             },
         )
 
-    print(f"All nodes queried successfully ({total_nodes/total_nodes}).")
+    print(f"All nodes queried successfully ({total_nodes}/{total_nodes}).")
     return {
         "errors": node_errors,
         "responses": cross_node_results,
