@@ -133,7 +133,9 @@ def test_partial_node_connection_failures_handled_gracefully(
     )
 
 
-def test_all_nodes_failure_handled_gracefully(monkeypatch, test_app, capsys):
+def test_all_nodes_failure_handled_gracefully(
+    monkeypatch, test_app, mock_failed_connection_httpx_get, capsys
+):
     """
     Test that when queries sent to all nodes fail, the federation API get request still succeeds,
     but includes an overall failure status and all encountered errors in the response.
@@ -146,11 +148,9 @@ def test_all_nodes_failure_handled_gracefully(monkeypatch, test_app, capsys):
             "https://secondpublicnode.org/": "Second Public Node",
         },
     )
-
-    async def mock_httpx_get(self, **kwargs):
-        raise httpx.ConnectError("Some connection error")
-
-    monkeypatch.setattr(httpx.AsyncClient, "get", mock_httpx_get)
+    monkeypatch.setattr(
+        httpx.AsyncClient, "get", mock_failed_connection_httpx_get
+    )
 
     with pytest.warns(
         UserWarning,

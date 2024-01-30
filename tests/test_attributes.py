@@ -63,7 +63,9 @@ def test_partially_failed_terms_fetching_handled_gracefully(
     }
 
 
-def test_fully_failed_terms_fetching_handled_gracefully(test_app, monkeypatch):
+def test_fully_failed_terms_fetching_handled_gracefully(
+    test_app, monkeypatch, mock_failed_connection_httpx_get
+):
     """
     Test that when getting term instances for an attribute (/attribute/{data_element_URI}) fails for *all* nodes,
     the overall API get request still succeeds, but includes an overall failure status and all encountered errors in the response.
@@ -76,12 +78,9 @@ def test_fully_failed_terms_fetching_handled_gracefully(test_app, monkeypatch):
             "https://secondpublicnode.org/": "Second Public Node",
         },
     )
-
-    # TODO: Can probably refactor this out into a fixture
-    async def mock_httpx_get(self, **kwargs):
-        raise httpx.ConnectError("Some connection error")
-
-    monkeypatch.setattr(httpx.AsyncClient, "get", mock_httpx_get)
+    monkeypatch.setattr(
+        httpx.AsyncClient, "get", mock_failed_connection_httpx_get
+    )
 
     response = test_app.get("/attributes/nb:Assessment")
     assert response.status_code == status.HTTP_207_MULTI_STATUS
