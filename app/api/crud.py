@@ -134,7 +134,6 @@ async def get(
 
 
 async def get_terms(data_element_URI: str):
-    # TODO: Make this path able to handle partial successes as well
     """
     Makes a GET request to one or more Neurobagel node APIs using send_get_request utility function where the only parameter is a data element URI.
 
@@ -148,20 +147,55 @@ async def get_terms(data_element_URI: str):
     dict
         Dictionary where the key is the Neurobagel class and values correspond to all the unique terms representing available (i.e. used) instances of that class.
     """
-    cross_node_results = []
-    params = {data_element_URI: data_element_URI}
-
-    for node_url in util.FEDERATION_NODES:
-        response = util.send_get_request(
-            node_url + "attributes/" + data_element_URI, params
-        )
-
-        cross_node_results.append(response)
-
+    node_errors = []
     unique_terms_dict = {}
 
-    for list_of_terms in cross_node_results:
-        for term in list_of_terms[data_element_URI]:
-            unique_terms_dict[term["TermURL"]] = term
+    params = {data_element_URI: data_element_URI}
+    tasks = [
+        util.send_get_request(
+            node_url + "attributes/" + data_element_URI, params
+        )
+        for node_url in util.FEDERATION_NODES
+    ]
+    responses = await asyncio.gather(*tasks, return_exceptions=True)
 
-    return {data_element_URI: list(unique_terms_dict.values())}
+    for node_url, response in zip(util.FEDERATION_NODES, responses):
+        if isinstance(response, HTTPException):
+            node_errors.append(
+                {
+                    "node_name": util.FEDERATION_NODES[node_url],
+                    "error": response.detail,
+                }
+            )
+        else:
+            # Build the dictionary of unique term-label pairings from all nodes
+            for term_dict in response[data_element_URI]:
+                unique_terms_dict[term_dict["TermURL"]] = term_dict
+
+    cross_node_results = {data_element_URI: list(unique_terms_dict.values())}
+
+    if node_errors:
+        if len(node_errors) == len(util.FEDERATION_NODES):
+            # See https://fastapi.tiangolo.com/advanced/additional-responses/ for more info
+            return JSONResponse(
+                status_code=status.HTTP_207_MULTI_STATUS,
+                content={
+                    "errors": node_errors,
+                    "responses": cross_node_results,
+                    "nodes_response_status": "fail",
+                },
+            )
+        return JSONResponse(
+            status_code=status.HTTP_207_MULTI_STATUS,
+            content={
+                "errors": node_errors,
+                "responses": cross_node_results,
+                "nodes_response_status": "partial success",
+            },
+        )
+
+    return {
+        "errors": node_errors,
+        "responses": cross_node_results,
+        "nodes_response_status": "success",
+    }
