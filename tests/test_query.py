@@ -203,3 +203,56 @@ def test_all_nodes_success_handled_gracefully(
     assert response["errors"] == []
     assert len(response["responses"]) == 2
     assert "All nodes queried successfully (2/2)" in captured.out
+
+
+def test_partially_failed_terms_fetching_handled_gracefully(
+    test_app, monkeypatch
+):
+    """
+    Test that when getting term instances for an attribute (/attribute/{data_element_URI}) fails for some nodes due to an error,
+    the overall API get request still succeeds, and the response includes a list of the encountered errors along with the successfully fetched terms.
+    """
+    monkeypatch.setattr(
+        util,
+        "FEDERATION_NODES",
+        {
+            "https://firstpublicnode.org/": "First Public Node",
+            "https://secondpublicnode.org/": "Second Public Node",
+        },
+    )
+
+    async def mock_httpx_get(self, **kwargs):
+        # TODO: Check for substring instead?
+        if (
+            kwargs["url"]
+            == "https://firstpublicnode.org/attributes/nb:Assessment"
+        ):
+            return httpx.Response(
+                status_code=200,
+                json={
+                    "nb:Assessment": [
+                        {
+                            "TermURL": "cogatlas:trm_56a9137d9dce1",
+                            "Label": "behavioral approach/inhibition systems",
+                        },
+                        {
+                            "TermURL": "cogatlas:trm_55a6a8e81b7f4",
+                            "Label": "Barratt Impulsiveness Scale",
+                        },
+                    ]
+                },
+            )
+
+        return httpx.Response(
+            status_code=500, json={}, text="Some internal server error"
+        )
+
+    monkeypatch.setattr(httpx.AsyncClient, "get", mock_httpx_get)
+
+    response = test_app.get("/attributes/nb:Assessment")
+    assert response.status_code == status.HTTP_207_MULTI_STATUS
+
+    response = response.json()
+    assert len(response["errors"]) == 1
+    assert len(response["responses"]) == 1
+    assert response["nodes_response_status"] == "partial success"
