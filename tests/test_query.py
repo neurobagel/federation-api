@@ -221,26 +221,27 @@ def test_partially_failed_terms_fetching_handled_gracefully(
         },
     )
 
+    mocked_node_attribute_response = {
+        "nb:Assessment": [
+            {
+                "TermURL": "cogatlas:trm_56a9137d9dce1",
+                "Label": "behavioral approach/inhibition systems",
+            },
+            {
+                "TermURL": "cogatlas:trm_55a6a8e81b7f4",
+                "Label": "Barratt Impulsiveness Scale",
+            },
+        ]
+    }
+
     async def mock_httpx_get(self, **kwargs):
-        # TODO: Check for substring instead?
         if (
             kwargs["url"]
             == "https://firstpublicnode.org/attributes/nb:Assessment"
         ):
             return httpx.Response(
                 status_code=200,
-                json={
-                    "nb:Assessment": [
-                        {
-                            "TermURL": "cogatlas:trm_56a9137d9dce1",
-                            "Label": "behavioral approach/inhibition systems",
-                        },
-                        {
-                            "TermURL": "cogatlas:trm_55a6a8e81b7f4",
-                            "Label": "Barratt Impulsiveness Scale",
-                        },
-                    ]
-                },
+                json=mocked_node_attribute_response,
             )
 
         return httpx.Response(
@@ -253,6 +254,13 @@ def test_partially_failed_terms_fetching_handled_gracefully(
     assert response.status_code == status.HTTP_207_MULTI_STATUS
 
     response = response.json()
-    assert len(response["errors"]) == 1
-    assert len(response["responses"]) == 1
-    assert response["nodes_response_status"] == "partial success"
+    assert response == {
+        "errors": [
+            {
+                "node_name": "Second Public Node",
+                "error": "Internal Server Error: Some internal server error",
+            },
+        ],
+        "responses": mocked_node_attribute_response,
+        "nodes_response_status": "partial success",
+    }
