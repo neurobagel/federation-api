@@ -56,6 +56,7 @@ def test_add_trailing_slash(url, expected_url):
                 "https://secondnode.neurobagel.org/query/": "secondnode",
             },
         ),
+        # TODO: Move this test case to test_schema_invalid_nodes_raise_warning
         ({}, {}),
     ],
 )
@@ -220,3 +221,12 @@ def test_invalid_json_raises_warning(tmp_path):
 
     with pytest.warns(UserWarning, match="You provided an invalid JSON"):
         util.parse_nodes_as_dict(tmp_path / "local_nb_nodes.json")
+
+
+def test_empty_json_does_not_error(tmp_path):
+    """Ensure that an empty JSON file does not raise an error."""
+
+    with open(tmp_path / "local_nb_nodes.json", "w") as f:
+        f.write("")
+
+    assert util.parse_nodes_as_dict(tmp_path / "local_nb_nodes.json") == {}
