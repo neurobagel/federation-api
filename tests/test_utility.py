@@ -56,8 +56,6 @@ def test_add_trailing_slash(url, expected_url):
                 "https://secondnode.neurobagel.org/query/": "secondnode",
             },
         ),
-        # TODO: Move this test case to test_schema_invalid_nodes_raise_warning
-        ({}, {}),
     ],
 )
 def test_parse_nodes_as_dict(set_nodes, expected_nodes, tmp_path):
@@ -191,6 +189,7 @@ def test_validate_query_node_url_list(
                 "https://firstnode.neurobagel.org/query/": "firstnode",
             },
         ),
+        ({}, {}),
     ],
 )
 def test_schema_invalid_nodes_raise_warning(
