@@ -75,7 +75,7 @@ def test_partial_node_failure_responses_handled_gracefully(
         "nodes_response_status": "partial success",
     }
     assert (
-        "Queries to 1/2 nodes failed: ['Second Public Node']" in captured.out
+        "Requests to 1/2 nodes failed: ['Second Public Node']" in captured.out
     )
 
 
@@ -129,7 +129,7 @@ def test_partial_node_connection_failures_handled_gracefully(
         "nodes_response_status": "partial success",
     }
     assert (
-        "Queries to 1/2 nodes failed: ['Second Public Node']" in captured.out
+        "Requests to 1/2 nodes failed: ['Second Public Node']" in captured.out
     )
 
 
@@ -166,7 +166,7 @@ def test_all_nodes_failure_handled_gracefully(
     assert len(response["errors"]) == 2
     assert response["responses"] == []
     assert (
-        "Queries to 2/2 nodes failed: ['First Public Node', 'Second Public Node']"
+        "Requests to 2/2 nodes failed: ['First Public Node', 'Second Public Node']"
         in captured.out
     )
 
@@ -202,4 +202,4 @@ def test_all_nodes_success_handled_gracefully(
     assert response["nodes_response_status"] == "success"
     assert response["errors"] == []
     assert len(response["responses"]) == 2
-    assert "All nodes queried successfully (2/2)" in captured.out
+    assert "Requests to all nodes succeeded (2/2)" in captured.out

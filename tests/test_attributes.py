@@ -1,4 +1,5 @@
 import httpx
+import pytest
 from fastapi import status
 
 from app.api import utility as util
@@ -48,7 +49,9 @@ def test_partially_failed_terms_fetching_handled_gracefully(
 
     monkeypatch.setattr(httpx.AsyncClient, "get", mock_httpx_get)
 
-    response = test_app.get("/attributes/nb:Assessment")
+    with pytest.warns(UserWarning):
+        response = test_app.get("/attributes/nb:Assessment")
+
     assert response.status_code == status.HTTP_207_MULTI_STATUS
 
     assert response.json() == {
@@ -82,7 +85,9 @@ def test_fully_failed_terms_fetching_handled_gracefully(
         httpx.AsyncClient, "get", mock_failed_connection_httpx_get
     )
 
-    response = test_app.get("/attributes/nb:Assessment")
+    with pytest.warns(UserWarning):
+        response = test_app.get("/attributes/nb:Assessment")
+
     assert response.status_code == status.HTTP_207_MULTI_STATUS
 
     response = response.json()

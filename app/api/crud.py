@@ -9,6 +9,42 @@ from fastapi.responses import JSONResponse
 from . import utility as util
 
 
+def build_combined_response(
+    total_nodes: int, cross_node_results: list | dict, node_errors: list
+) -> dict:
+    """Return a combined response containing all the nodes' responses and errors. Logs to console a summary of the federated request."""
+    if node_errors:
+        # TODO: Use logger instead of print, see https://github.com/tiangolo/fastapi/issues/5003
+        print(
+            f"Requests to {len(node_errors)}/{total_nodes} nodes failed: {[node_error['node_name'] for node_error in node_errors]}."
+        )
+        if len(node_errors) == total_nodes:
+            # See https://fastapi.tiangolo.com/advanced/additional-responses/ for more info
+            return JSONResponse(
+                status_code=status.HTTP_207_MULTI_STATUS,
+                content={
+                    "errors": node_errors,
+                    "responses": cross_node_results,
+                    "nodes_response_status": "fail",
+                },
+            )
+        return JSONResponse(
+            status_code=status.HTTP_207_MULTI_STATUS,
+            content={
+                "errors": node_errors,
+                "responses": cross_node_results,
+                "nodes_response_status": "partial success",
+            },
+        )
+
+    print(f"Requests to all nodes succeeded ({total_nodes}/{total_nodes}).")
+    return {
+        "errors": node_errors,
+        "responses": cross_node_results,
+        "nodes_response_status": "success",
+    }
+
+
 async def get(
     min_age: float,
     max_age: float,
@@ -57,7 +93,6 @@ async def get(
     node_errors = []
 
     node_urls = util.validate_query_node_url_list(node_urls)
-    total_nodes = len(node_urls)
 
     # Node API query parameters
     params = {}
@@ -93,49 +128,23 @@ async def get(
                 {"node_name": node_name, "error": response.detail}
             )
             warnings.warn(
-                f"Query to node {node_name} ({node_url}) did not succeed: {response.detail}"
+                f"Request to node {node_name} ({node_url}) did not succeed: {response.detail}"
             )
         else:
             for result in response:
                 result["node_name"] = node_name
             cross_node_results.extend(response)
 
-    if node_errors:
-        # TODO: Use logger instead of print, see https://github.com/tiangolo/fastapi/issues/5003
-        print(
-            f"Queries to {len(node_errors)}/{total_nodes} nodes failed: {[node_error['node_name'] for node_error in node_errors]}."
-        )
-
-        if len(node_errors) == total_nodes:
-            # See https://fastapi.tiangolo.com/advanced/additional-responses/ for more info
-            return JSONResponse(
-                status_code=status.HTTP_207_MULTI_STATUS,
-                content={
-                    "errors": node_errors,
-                    "responses": cross_node_results,
-                    "nodes_response_status": "fail",
-                },
-            )
-        return JSONResponse(
-            status_code=status.HTTP_207_MULTI_STATUS,
-            content={
-                "errors": node_errors,
-                "responses": cross_node_results,
-                "nodes_response_status": "partial success",
-            },
-        )
-
-    print(f"All nodes queried successfully ({total_nodes}/{total_nodes}).")
-    return {
-        "errors": node_errors,
-        "responses": cross_node_results,
-        "nodes_response_status": "success",
-    }
+    return build_combined_response(
+        total_nodes=len(node_urls),
+        cross_node_results=cross_node_results,
+        node_errors=node_errors,
+    )
 
 
 async def get_terms(data_element_URI: str):
     """
-    Makes a GET request to one or more Neurobagel node APIs using send_get_request utility function where the only parameter is a data element URI.
+    Makes a GET request to all available Neurobagel node APIs using send_get_request utility function where the only parameter is a data element URI.
 
     Parameters
     ----------
@@ -160,12 +169,13 @@ async def get_terms(data_element_URI: str):
     responses = await asyncio.gather(*tasks, return_exceptions=True)
 
     for node_url, response in zip(util.FEDERATION_NODES, responses):
+        node_name = util.FEDERATION_NODES[node_url]
         if isinstance(response, HTTPException):
             node_errors.append(
-                {
-                    "node_name": util.FEDERATION_NODES[node_url],
-                    "error": response.detail,
-                }
+                {"node_name": node_name, "error": response.detail}
+            )
+            warnings.warn(
+                f"Request to node {node_name} ({node_url}) did not succeed: {response.detail}"
             )
         else:
             # Build the dictionary of unique term-label pairings from all nodes
@@ -174,28 +184,8 @@ async def get_terms(data_element_URI: str):
 
     cross_node_results = {data_element_URI: list(unique_terms_dict.values())}
 
-    if node_errors:
-        if len(node_errors) == len(util.FEDERATION_NODES):
-            # See https://fastapi.tiangolo.com/advanced/additional-responses/ for more info
-            return JSONResponse(
-                status_code=status.HTTP_207_MULTI_STATUS,
-                content={
-                    "errors": node_errors,
-                    "responses": cross_node_results,
-                    "nodes_response_status": "fail",
-                },
-            )
-        return JSONResponse(
-            status_code=status.HTTP_207_MULTI_STATUS,
-            content={
-                "errors": node_errors,
-                "responses": cross_node_results,
-                "nodes_response_status": "partial success",
-            },
-        )
-
-    return {
-        "errors": node_errors,
-        "responses": cross_node_results,
-        "nodes_response_status": "success",
-    }
+    return build_combined_response(
+        total_nodes=len(util.FEDERATION_NODES),
+        cross_node_results=cross_node_results,
+        node_errors=node_errors,
+    )
