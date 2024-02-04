@@ -14,7 +14,7 @@ def build_combined_response(
 ) -> dict:
     """Return a combined response containing all the nodes' responses and errors. Logs to console a summary of the federated request."""
     if node_errors:
-        # TODO: Use logger instead of print, see https://github.com/tiangolo/fastapi/issues/5003
+        # TODO: Use logger instead of print. For example of how to set this up for FastAPI, see https://github.com/tiangolo/fastapi/discussions/8517
         print(
             f"Requests to {len(node_errors)}/{total_nodes} nodes failed: {[node_error['node_name'] for node_error in node_errors]}."
         )
@@ -127,6 +127,7 @@ async def get(
             node_errors.append(
                 {"node_name": node_name, "error": response.detail}
             )
+            # TODO: Replace with logger
             warnings.warn(
                 f"Request to node {node_name} ({node_url}) did not succeed: {response.detail}"
             )
@@ -174,6 +175,7 @@ async def get_terms(data_element_URI: str):
             node_errors.append(
                 {"node_name": node_name, "error": response.detail}
             )
+            # TODO: Replace with logger
             warnings.warn(
                 f"Request to node {node_name} ({node_url}) did not succeed: {response.detail}"
             )
