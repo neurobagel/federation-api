@@ -9,7 +9,7 @@ def test_partially_failed_terms_fetching_handled_gracefully(
     test_app, monkeypatch
 ):
     """
-    Test that when getting term instances for an attribute (/attribute/{data_element_URI}) fails for some nodes due to an error,
+    When some nodes fail while getting term instances for an attribute (/attribute/{data_element_URI}),
     the overall API get request still succeeds, and the response includes a list of the encountered errors along with the successfully fetched terms.
     """
     monkeypatch.setattr(
@@ -70,7 +70,7 @@ def test_fully_failed_terms_fetching_handled_gracefully(
     test_app, monkeypatch, mock_failed_connection_httpx_get
 ):
     """
-    Test that when getting term instances for an attribute (/attribute/{data_element_URI}) fails for *all* nodes,
+    When *all* nodes fail while getting term instances for an attribute (/attribute/{data_element_URI}),
     the overall API get request still succeeds, but includes an overall failure status and all encountered errors in the response.
     """
     monkeypatch.setattr(
