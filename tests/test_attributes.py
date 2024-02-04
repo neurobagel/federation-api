@@ -37,14 +37,14 @@ def test_partially_failed_terms_fetching_handled_gracefully(
     async def mock_httpx_get(self, **kwargs):
         if (
             kwargs["url"]
-            == "https://firstpublicnode.org/attributes/nb:Assessment"
+            == "https://secondpublicnode.org/attributes/nb:Assessment"
         ):
             return httpx.Response(
-                status_code=200,
-                json=mocked_node_attribute_response,
+                status_code=500, json={}, text="Some internal server error"
             )
         return httpx.Response(
-            status_code=500, json={}, text="Some internal server error"
+            status_code=200,
+            json=mocked_node_attribute_response,
         )
 
     monkeypatch.setattr(httpx.AsyncClient, "get", mock_httpx_get)
@@ -54,16 +54,15 @@ def test_partially_failed_terms_fetching_handled_gracefully(
 
     assert response.status_code == status.HTTP_207_MULTI_STATUS
 
-    assert response.json() == {
-        "errors": [
-            {
-                "node_name": "Second Public Node",
-                "error": "Internal Server Error: Some internal server error",
-            },
-        ],
-        "responses": mocked_node_attribute_response,
-        "nodes_response_status": "partial success",
-    }
+    response_object = response.json()
+    assert response_object["errors"] == [
+        {
+            "node_name": "Second Public Node",
+            "error": "Internal Server Error: Some internal server error",
+        }
+    ]
+    assert response_object["responses"] == mocked_node_attribute_response
+    assert response_object["nodes_response_status"] == "partial success"
 
 
 def test_fully_failed_terms_fetching_handled_gracefully(
