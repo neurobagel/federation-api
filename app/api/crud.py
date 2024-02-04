@@ -13,6 +13,8 @@ def build_combined_response(
     total_nodes: int, cross_node_results: list | dict, node_errors: list
 ) -> dict:
     """Return a combined response containing all the nodes' responses and errors. Logs to console a summary of the federated request."""
+    content = {"errors": node_errors, "responses": cross_node_results}
+
     if node_errors:
         # TODO: Use logger instead of print. For example of how to set this up for FastAPI, see https://github.com/tiangolo/fastapi/discussions/8517
         print(
@@ -20,29 +22,16 @@ def build_combined_response(
         )
         if len(node_errors) == total_nodes:
             # See https://fastapi.tiangolo.com/advanced/additional-responses/ for more info
-            return JSONResponse(
-                status_code=status.HTTP_207_MULTI_STATUS,
-                content={
-                    "errors": node_errors,
-                    "responses": cross_node_results,
-                    "nodes_response_status": "fail",
-                },
-            )
+            content["nodes_response_status"] = "fail"
+        else:
+            content["nodes_response_status"] = "partial success"
         return JSONResponse(
-            status_code=status.HTTP_207_MULTI_STATUS,
-            content={
-                "errors": node_errors,
-                "responses": cross_node_results,
-                "nodes_response_status": "partial success",
-            },
+            status_code=status.HTTP_207_MULTI_STATUS, content=content
         )
 
     print(f"Requests to all nodes succeeded ({total_nodes}/{total_nodes}).")
-    return {
-        "errors": node_errors,
-        "responses": cross_node_results,
-        "nodes_response_status": "success",
-    }
+    content["nodes_response_status"] = "success"
+    return content
 
 
 async def get(
@@ -169,8 +158,9 @@ async def get_terms(data_element_URI: str):
     ]
     responses = await asyncio.gather(*tasks, return_exceptions=True)
 
-    for node_url, response in zip(util.FEDERATION_NODES, responses):
-        node_name = util.FEDERATION_NODES[node_url]
+    for (node_url, node_name), response in zip(
+        util.FEDERATION_NODES.items(), responses
+    ):
         if isinstance(response, HTTPException):
             node_errors.append(
                 {"node_name": node_name, "error": response.detail}
