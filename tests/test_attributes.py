@@ -2,25 +2,16 @@ import httpx
 import pytest
 from fastapi import status
 
-from app.api import utility as util
-
 
 def test_partially_failed_terms_fetching_handled_gracefully(
-    test_app, monkeypatch
+    test_app,
+    monkeypatch,
+    set_valid_test_federation_nodes,
 ):
     """
     When some nodes fail while getting term instances for an attribute (/attribute/{data_element_URI}),
     the overall API get request still succeeds, and the response includes a list of the encountered errors along with the successfully fetched terms.
     """
-    monkeypatch.setattr(
-        util,
-        "FEDERATION_NODES",
-        {
-            "https://firstpublicnode.org/": "First Public Node",
-            "https://secondpublicnode.org/": "Second Public Node",
-        },
-    )
-
     mocked_node_attribute_response = {
         "nb:Assessment": [
             {
@@ -66,20 +57,15 @@ def test_partially_failed_terms_fetching_handled_gracefully(
 
 
 def test_fully_failed_terms_fetching_handled_gracefully(
-    test_app, monkeypatch, mock_failed_connection_httpx_get
+    test_app,
+    monkeypatch,
+    mock_failed_connection_httpx_get,
+    set_valid_test_federation_nodes,
 ):
     """
     When *all* nodes fail while getting term instances for an attribute (/attribute/{data_element_URI}),
     the overall API get request still succeeds, but includes an overall failure status and all encountered errors in the response.
     """
-    monkeypatch.setattr(
-        util,
-        "FEDERATION_NODES",
-        {
-            "https://firstpublicnode.org/": "First Public Node",
-            "https://secondpublicnode.org/": "Second Public Node",
-        },
-    )
     monkeypatch.setattr(
         httpx.AsyncClient, "get", mock_failed_connection_httpx_get
     )

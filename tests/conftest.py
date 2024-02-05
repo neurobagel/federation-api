@@ -2,6 +2,7 @@ import httpx
 import pytest
 from starlette.testclient import TestClient
 
+from app.api import utility as util
 from app.main import app
 
 
@@ -9,6 +10,18 @@ from app.main import app
 def test_app():
     client = TestClient(app)
     yield client
+
+
+@pytest.fixture(scope="function")
+def set_valid_test_federation_nodes(monkeypatch):
+    monkeypatch.setattr(
+        util,
+        "FEDERATION_NODES",
+        {
+            "https://firstpublicnode.org/": "First Public Node",
+            "https://secondpublicnode.org/": "Second Public Node",
+        },
+    )
 
 
 @pytest.fixture()

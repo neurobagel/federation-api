@@ -2,8 +2,6 @@ import httpx
 import pytest
 from fastapi import status
 
-from app.api import utility as util
-
 
 @pytest.fixture()
 def mocked_single_matching_dataset_result():
@@ -24,20 +22,16 @@ def mocked_single_matching_dataset_result():
 
 
 def test_partial_node_failure_responses_handled_gracefully(
-    monkeypatch, test_app, capsys, mocked_single_matching_dataset_result
+    monkeypatch,
+    test_app,
+    capsys,
+    set_valid_test_federation_nodes,
+    mocked_single_matching_dataset_result,
 ):
     """
     Test that when queries to some nodes return errors, the overall API get request still succeeds,
     the successful responses are returned along with a list of the encountered errors, and the failed nodes are logged to the console.
     """
-    monkeypatch.setattr(
-        util,
-        "FEDERATION_NODES",
-        {
-            "https://firstpublicnode.org/": "First Public Node",
-            "https://secondpublicnode.org/": "Second Public Node",
-        },
-    )
 
     async def mock_httpx_get(self, **kwargs):
         if kwargs["url"] == "https://firstpublicnode.org/query/":
@@ -80,20 +74,16 @@ def test_partial_node_failure_responses_handled_gracefully(
 
 
 def test_partial_node_connection_failures_handled_gracefully(
-    monkeypatch, test_app, capsys, mocked_single_matching_dataset_result
+    monkeypatch,
+    test_app,
+    capsys,
+    set_valid_test_federation_nodes,
+    mocked_single_matching_dataset_result,
 ):
     """
     Test that when requests to some nodes fail (e.g., if API is unreachable), the overall API get request still succeeds,
     the successful responses are returned along with a list of the encountered errors, and the failed nodes are logged to the console.
     """
-    monkeypatch.setattr(
-        util,
-        "FEDERATION_NODES",
-        {
-            "https://firstpublicnode.org/": "First Public Node",
-            "https://secondpublicnode.org/": "Second Public Node",
-        },
-    )
 
     async def mock_httpx_get(self, **kwargs):
         if kwargs["url"] == "https://firstpublicnode.org/query/":
@@ -134,20 +124,16 @@ def test_partial_node_connection_failures_handled_gracefully(
 
 
 def test_all_nodes_failure_handled_gracefully(
-    monkeypatch, test_app, mock_failed_connection_httpx_get, capsys
+    monkeypatch,
+    test_app,
+    mock_failed_connection_httpx_get,
+    set_valid_test_federation_nodes,
+    capsys,
 ):
     """
     Test that when queries sent to all nodes fail, the federation API get request still succeeds,
     but includes an overall failure status and all encountered errors in the response.
     """
-    monkeypatch.setattr(
-        util,
-        "FEDERATION_NODES",
-        {
-            "https://firstpublicnode.org/": "First Public Node",
-            "https://secondpublicnode.org/": "Second Public Node",
-        },
-    )
     monkeypatch.setattr(
         httpx.AsyncClient, "get", mock_failed_connection_httpx_get
     )
@@ -172,19 +158,15 @@ def test_all_nodes_failure_handled_gracefully(
 
 
 def test_all_nodes_success_handled_gracefully(
-    monkeypatch, test_app, capsys, mocked_single_matching_dataset_result
+    monkeypatch,
+    test_app,
+    capsys,
+    set_valid_test_federation_nodes,
+    mocked_single_matching_dataset_result,
 ):
     """
     Test that when queries sent to all nodes succeed, the federation API response includes an overall success status and no errors.
     """
-    monkeypatch.setattr(
-        util,
-        "FEDERATION_NODES",
-        {
-            "https://firstpublicnode.org/": "First Public Node",
-            "https://secondpublicnode.org/": "Second Public Node",
-        },
-    )
 
     async def mock_httpx_get(self, **kwargs):
         return httpx.Response(
