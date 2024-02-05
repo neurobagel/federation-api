@@ -26,6 +26,8 @@ def test_partially_failed_terms_fetching_handled_gracefully(
     }
 
     async def mock_httpx_get(self, **kwargs):
+        # The self parameter is necessary to match the signature of the method being mocked,
+        # which is a class method of the httpx.AsyncClient class (see https://www.python-httpx.org/api/#asyncclient).
         if (
             kwargs["url"]
             == "https://secondpublicnode.org/attributes/nb:Assessment"

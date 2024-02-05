@@ -34,6 +34,8 @@ def test_partial_node_failure_responses_handled_gracefully(
     """
 
     async def mock_httpx_get(self, **kwargs):
+        # The self parameter is necessary to match the signature of the method being mocked,
+        # which is a class method of the httpx.AsyncClient class (see https://www.python-httpx.org/api/#asyncclient).
         if kwargs["url"] == "https://firstpublicnode.org/query/":
             return httpx.Response(
                 status_code=200, json=[mocked_single_matching_dataset_result]
