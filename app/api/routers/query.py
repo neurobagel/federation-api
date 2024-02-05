@@ -1,6 +1,6 @@
 """Router for query path operations."""
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response, status
 
 from .. import crud
 from ..models import CombinedQueryResponse, QueryModel
@@ -9,9 +9,11 @@ router = APIRouter(prefix="/query", tags=["query"])
 
 
 @router.get("/", response_model=CombinedQueryResponse)
-async def get_query(query: QueryModel = Depends(QueryModel)):
+async def get_query(
+    response: Response, query: QueryModel = Depends(QueryModel)
+):
     """When a GET request is sent, return list of dicts corresponding to subject-level metadata aggregated by dataset."""
-    response = await crud.get(
+    response_dict = await crud.get(
         query.min_age,
         query.max_age,
         query.sex,
@@ -24,4 +26,7 @@ async def get_query(query: QueryModel = Depends(QueryModel)):
         query.node_url,
     )
 
-    return response
+    if response_dict["errors"]:
+        response.status_code = status.HTTP_207_MULTI_STATUS
+
+    return response_dict

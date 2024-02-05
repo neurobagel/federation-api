@@ -3,8 +3,7 @@
 import asyncio
 import warnings
 
-from fastapi import HTTPException, status
-from fastapi.responses import JSONResponse
+from fastapi import HTTPException
 
 from . import utility as util
 
@@ -25,12 +24,12 @@ def build_combined_response(
             content["nodes_response_status"] = "fail"
         else:
             content["nodes_response_status"] = "partial success"
-        return JSONResponse(
-            status_code=status.HTTP_207_MULTI_STATUS, content=content
+    else:
+        print(
+            f"Requests to all nodes succeeded ({total_nodes}/{total_nodes})."
         )
+        content["nodes_response_status"] = "success"
 
-    print(f"Requests to all nodes succeeded ({total_nodes}/{total_nodes}).")
-    content["nodes_response_status"] = "success"
     return content
 
 
