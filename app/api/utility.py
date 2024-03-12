@@ -239,6 +239,10 @@ async def send_get_request(url: str, params: list) -> dict:
                     detail=f"{response.reason_phrase}: {response.text}",
                 )
             return response.json()
+        # Make sure that any HTTPException raised by us is not then caught by the most generic Exception block below
+        # (from https://stackoverflow.com/a/16123643)
+        except HTTPException:
+            raise
         except httpx.NetworkError as exc:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
