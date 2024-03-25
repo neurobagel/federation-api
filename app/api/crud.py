@@ -1,6 +1,7 @@
 """CRUD functions called by path operations."""
 
 import asyncio
+import logging
 import warnings
 
 from fastapi import HTTPException
@@ -15,8 +16,7 @@ def build_combined_response(
     content = {"errors": node_errors, "responses": cross_node_results}
 
     if node_errors:
-        # TODO: Use logger instead of print. For example of how to set this up for FastAPI, see https://github.com/tiangolo/fastapi/discussions/8517
-        print(
+        logging.error(
             f"Requests to {len(node_errors)}/{total_nodes} nodes failed: {[node_error['node_name'] for node_error in node_errors]}."
         )
         if len(node_errors) == total_nodes:
@@ -25,7 +25,7 @@ def build_combined_response(
         else:
             content["nodes_response_status"] = "partial success"
     else:
-        print(
+        logging.info(
             f"Requests to all nodes succeeded ({total_nodes}/{total_nodes})."
         )
         content["nodes_response_status"] = "success"
