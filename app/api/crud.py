@@ -2,7 +2,6 @@
 
 import asyncio
 import logging
-import warnings
 
 from fastapi import HTTPException
 
@@ -115,8 +114,7 @@ async def get(
             node_errors.append(
                 {"node_name": node_name, "error": response.detail}
             )
-            # TODO: Replace with logger
-            warnings.warn(
+            logging.warning(
                 f"Request to node {node_name} ({node_url}) did not succeed: {response.detail}"
             )
         else:
@@ -164,8 +162,7 @@ async def get_terms(data_element_URI: str):
             node_errors.append(
                 {"node_name": node_name, "error": response.detail}
             )
-            # TODO: Replace with logger
-            warnings.warn(
+            logging.warning(
                 f"Request to node {node_name} ({node_url}) did not succeed: {response.detail}"
             )
         else:

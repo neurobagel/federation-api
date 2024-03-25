@@ -50,11 +50,7 @@ def test_partial_node_failure_responses_handled_gracefully(
 
     monkeypatch.setattr(httpx.AsyncClient, "get", mock_httpx_get)
 
-    with pytest.warns(
-        UserWarning,
-        match=r"Second Public Node \(https://secondpublicnode.org/\) did not succeed",
-    ):
-        response = test_app.get("/query/")
+    response = test_app.get("/query/")
 
     assert response.status_code == status.HTTP_207_MULTI_STATUS
     assert response.json() == {
@@ -72,6 +68,10 @@ def test_partial_node_failure_responses_handled_gracefully(
         ],
         "nodes_response_status": "partial success",
     }
+    assert (
+        "Second Public Node (https://secondpublicnode.org/) did not succeed"
+        in caplog.text
+    )
     assert (
         "Requests to 1/2 nodes failed: ['Second Public Node']" in caplog.text
     )
@@ -123,11 +123,7 @@ def test_partial_node_request_failures_handled_gracefully(
 
     monkeypatch.setattr(httpx.AsyncClient, "get", mock_httpx_get)
 
-    with pytest.warns(
-        UserWarning,
-        match=r"Second Public Node \(https://secondpublicnode.org/\) did not succeed",
-    ):
-        response = test_app.get("/query/")
+    response = test_app.get("/query/")
 
     assert response.status_code == status.HTTP_207_MULTI_STATUS
 
@@ -144,6 +140,10 @@ def test_partial_node_request_failures_handled_gracefully(
     assert len(node_errors) == 1
     assert node_errors[0]["node_name"] == "Second Public Node"
     assert expected_node_message in node_errors[0]["error"]
+    assert (
+        "Second Public Node (https://secondpublicnode.org/) did not succeed"
+        in caplog.text
+    )
     assert (
         "Requests to 1/2 nodes failed: ['Second Public Node']" in caplog.text
     )
@@ -164,12 +164,10 @@ def test_all_nodes_failure_handled_gracefully(
         httpx.AsyncClient, "get", mock_failed_connection_httpx_get
     )
 
-    with pytest.warns(
-        UserWarning,
-    ) as w:
-        response = test_app.get("/query/")
+    response = test_app.get("/query/")
 
-    assert len(w) == 2
+    # We expect 3 logs here: one warning for each failed node, and one error for the overall failure
+    assert len(caplog.records) == 3
     assert response.status_code == status.HTTP_207_MULTI_STATUS
 
     response = response.json()
