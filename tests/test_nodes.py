@@ -165,6 +165,7 @@ def test_no_available_nodes_raises_error(monkeypatch, test_app, caplog):
     # one via warnings.warn for the lack of local nodes (because User error).
     assert len(w) == 1
     assert len(caplog.records) == 1
+    any(record.levelname == "WARNING" for record in caplog.records)
     assert (
         "No local or public Neurobagel nodes available for federation"
         in str(exc_info.value)

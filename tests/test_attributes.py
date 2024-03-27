@@ -44,6 +44,7 @@ def test_partially_failed_terms_fetching_handled_gracefully(
     assert response.status_code == status.HTTP_207_MULTI_STATUS
 
     assert len(caplog.records) > 0
+    any(record.levelname == "WARNING" for record in caplog.records)
 
     response_object = response.json()
     assert response_object["errors"] == [
@@ -76,6 +77,7 @@ def test_fully_failed_terms_fetching_handled_gracefully(
     assert response.status_code == status.HTTP_207_MULTI_STATUS
     # We expect several warnings from logging
     assert len(caplog.records) > 0
+    any(record.levelname == "WARNING" for record in caplog.records)
 
     response = response.json()
     assert response["nodes_response_status"] == "fail"
