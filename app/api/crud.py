@@ -15,7 +15,7 @@ def build_combined_response(
     content = {"errors": node_errors, "responses": cross_node_results}
 
     if node_errors:
-        logging.error(
+        logging.warning(
             f"Requests to {len(node_errors)}/{total_nodes} nodes failed: {[node_error['node_name'] for node_error in node_errors]}."
         )
         if len(node_errors) == total_nodes:
