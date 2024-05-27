@@ -157,19 +157,19 @@ async def create_federation_node_index():
                 ]
             )
 
-    if local_nodes:
-        logging.warning(
-            failed_get_warning
-            + f"Federation will be limited to the nodes defined locally for this API: {local_nodes}."
-        )
-    else:
-        logging.warning(failed_get_warning)
-        raise RuntimeError(
-            "No local or public Neurobagel nodes available for federation."
-            "Please define at least one local node in "
-            "a 'local_nb_nodes.json' file in the "
-            "current directory and try again."
-        )
+            if local_nodes:
+                logging.warning(
+                    failed_get_warning
+                    + f"Federation will be limited to the nodes defined locally for this API: {local_nodes}."
+                )
+            else:
+                logging.warning(failed_get_warning)
+                raise RuntimeError(
+                    "No local or public Neurobagel nodes available for federation."
+                    "Please define at least one local node in "
+                    "a 'local_nb_nodes.json' file in the "
+                    "current directory and try again."
+                )
 
     # This step will remove any duplicate keys from the local and public node dicts, giving priority to the local nodes.
     FEDERATION_NODES.update(
