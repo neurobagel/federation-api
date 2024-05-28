@@ -88,7 +88,7 @@ def test_failed_public_nodes_fetching_raises_warning(
 
     assert len(caplog.records) == 1
     for warn_substr in [
-        "IS_FEDERATE_REMOTE_PUBLIC_NODES is set to True, but",
+        "IS_FEDERATE_REMOTE_PUBLIC_NODES is set to True, but"
         "Unable to fetch directory of public Neurobagel nodes",
         "Federation will be limited to the nodes defined locally for this API: {'https://mylocalnode.org/': 'Local Node'}",
     ]:
