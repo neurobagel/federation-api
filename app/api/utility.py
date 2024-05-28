@@ -14,7 +14,7 @@ from jsonschema import validate
 
 EnvVar = namedtuple("EnvVar", ["name", "value"])
 
-FEDERATE_REMOTE_PUBLIC_NODES = EnvVar(
+IS_FEDERATE_REMOTE_PUBLIC_NODES = EnvVar(
     "NB_FEDERATE_REMOTE_PUBLIC_NODES",
     os.environ.get("NB_FEDERATE_REMOTE_PUBLIC_NODES", "True").lower()
     == "true",
@@ -138,7 +138,7 @@ async def create_federation_node_index():
     public_nodes = {}
     failed_get_warning = ""
 
-    if FEDERATE_REMOTE_PUBLIC_NODES.value:
+    if IS_FEDERATE_REMOTE_PUBLIC_NODES.value:
         node_directory_response = httpx.get(
             url=node_directory_url,
         )
