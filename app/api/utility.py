@@ -151,7 +151,8 @@ async def create_federation_node_index():
         else:
             failed_get_warning = "\n".join(
                 [
-                    f"Unable to fetch directory of public Neurobagel nodes from {node_directory_url}.",
+                    "IS_FEDERATE_REMOTE_PUBLIC_NODES is set to True, but",
+                    f"unable to fetch directory of public Neurobagel nodes from {node_directory_url}.",
                     "Details of the response from the source:",
                     f"Status code {node_directory_response.status_code}: {node_directory_response.reason_phrase}\n",
                 ]
