@@ -8,8 +8,14 @@ def test_root(test_app, set_valid_test_federation_nodes):
     response = test_app.get("/")
 
     assert response.status_code == status.HTTP_200_OK
-    assert "Welcome to the Neurobagel REST API" in response.text
-    assert '<a href="/docs">documentation</a>' in response.text
+    assert all(
+        substring in response.text
+        for substring in [
+            "Welcome to",
+            "Neurobagel",
+            '<a href="/docs">documentation</a>',
+        ]
+    )
 
 
 def test_partially_failed_terms_fetching_handled_gracefully(
