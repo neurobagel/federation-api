@@ -55,7 +55,7 @@ def root():
     return """
     <html>
         <body>
-            <h1>Welcome to the Neurobagel REST API!</h1>
+            <h1>Welcome to the Neurobagel Federation API!</h1>
             <p>Please visit the <a href="/docs">documentation</a> to view available API endpoints.</p>
         </body>
     </html>
