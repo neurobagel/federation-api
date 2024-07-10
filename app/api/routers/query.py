@@ -1,10 +1,13 @@
 """Router for query path operations."""
 
+import os
+
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2
 
 # from fastapi.security import open_id_connect_url
 from fastapi.security.utils import get_authorization_scheme_param
+from google.auth.exceptions import GoogleAuthError
 from google.auth.transport import requests
 from google.oauth2 import id_token
 
@@ -26,13 +29,19 @@ oauth2_scheme = OAuth2(
 #     openIdConnectUrl="https://accounts.google.com/.well-known/openid-configuration"
 # )
 
-CLIENT_ID = (
-    "465352721782-aj7eam9jdu967adj8vd8ckih325k62d5.apps.googleusercontent.com"
-)
+CLIENT_ID = os.environ.get("NB_QUERY_CLIENT_ID", None)
 
 
 def verify_token(token: str):
     """Verify the Google ID token. Raise an HTTPException if the token is invalid."""
+    # By default, if CLIENT_ID is not provided to verify_oauth2_token,
+    # Google will simply skip verifying the audience claim of ID tokens.
+    # This however can be a security risk, so we mandate that CLIENT_ID is set.
+    if not CLIENT_ID:
+        raise ValueError(
+            "Client ID of the Neurobagel query tool must be provided to verify the audience claim of ID tokens. "
+            "Please set the environment variable NB_QUERY_CLIENT_ID."
+        )
     # Adapted from https://developers.google.com/identity/gsi/web/guides/verify-google-id-token#python
     try:
         # Extract the token from the "Bearer" scheme
@@ -43,7 +52,7 @@ def verify_token(token: str):
         )
         # TODO: Remove print statement - just for testing
         print("Token verified: ", id_info)
-    except ValueError as exc:
+    except (GoogleAuthError, ValueError) as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Invalid token: {exc}",
