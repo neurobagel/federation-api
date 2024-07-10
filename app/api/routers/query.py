@@ -2,6 +2,8 @@
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2
+
+# from fastapi.security import open_id_connect_url
 from fastapi.security.utils import get_authorization_scheme_param
 from google.auth.transport import requests
 from google.oauth2 import id_token
@@ -11,6 +13,7 @@ from ..models import CombinedQueryResponse, QueryModel
 
 router = APIRouter(prefix="/query", tags=["query"])
 
+# Adapted from info in https://github.com/tiangolo/fastapi/discussions/9137#discussioncomment-5157382
 oauth2_scheme = OAuth2(
     flows={
         "implicit": {
@@ -18,6 +21,10 @@ oauth2_scheme = OAuth2(
         }
     }
 )
+# NOTE: Can also explicitly use OpenID Connect because Google supports it - results in the same behavior as the OAuth2 scheme above.
+# openid_connect_scheme = open_id_connect_url.OpenIdConnect(
+#     openIdConnectUrl="https://accounts.google.com/.well-known/openid-configuration"
+# )
 
 CLIENT_ID = (
     "465352721782-aj7eam9jdu967adj8vd8ckih325k62d5.apps.googleusercontent.com"
