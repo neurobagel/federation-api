@@ -1,9 +1,10 @@
 """Router for query path operations."""
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2
 
 from .. import crud
+from .. import utility as util
 from ..models import CombinedQueryResponse, QueryModel
 from ..security import verify_token
 
@@ -18,7 +19,8 @@ oauth2_scheme = OAuth2(
         "implicit": {
             "authorizationUrl": "https://accounts.google.com/o/oauth2/auth",
         }
-    }
+    },
+    auto_error=False,
 )
 # NOTE: Can also explicitly use OpenID Connect because Google supports it - results in the same behavior as the OAuth2 scheme above.
 # openid_connect_scheme = open_id_connect_url.OpenIdConnect(
@@ -36,7 +38,7 @@ oauth2_scheme = OAuth2(
 async def get_query(
     response: Response,
     query: QueryModel = Depends(QueryModel),
-    token: str = Depends(oauth2_scheme),
+    token: str | None = Depends(oauth2_scheme),
 ):
     """When a GET request is sent, return list of dicts corresponding to subject-level metadata aggregated by dataset."""
     # NOTE: Currently, when the request is unauthenticated (missing or malformed authorization header -> missing token),
@@ -53,8 +55,13 @@ async def get_query(
     #         detail="Not authenticated",
     #         headers={"WWW-Authenticate": "Bearer"},
     #     )
-
-    verify_token(token)
+    if util.AUTH_ENABLED:
+        if token is None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not authenticated",
+            )
+        verify_token(token)
 
     response_dict = await crud.get(
         query.min_age,
