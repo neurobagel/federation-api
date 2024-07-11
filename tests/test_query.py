@@ -7,6 +7,30 @@ from fastapi import status
 
 
 @pytest.fixture()
+def mock_token():
+    """Create a mock token that is well-formed for testing purposes."""
+    return "Bearer foo"
+
+
+@pytest.fixture()
+def mock_verify_token():
+    """Mock a successful token verification that does not raise any exceptions."""
+
+    def _verify_token(token):
+        return None
+
+    return _verify_token
+
+
+@pytest.fixture()
+def set_mock_verify_token(monkeypatch, mock_verify_token):
+    """Set the verify_token function to a mock that does not raise any exceptions."""
+    monkeypatch.setattr(
+        "app.api.routers.query.verify_token", mock_verify_token
+    )
+
+
+@pytest.fixture()
 def mocked_single_matching_dataset_result():
     """Valid aggregate query result for a single matching dataset."""
     return {
@@ -29,6 +53,8 @@ def test_partial_node_failure_responses_handled_gracefully(
     test_app,
     set_valid_test_federation_nodes,
     mocked_single_matching_dataset_result,
+    mock_token,
+    set_mock_verify_token,
     caplog,
 ):
     """
@@ -50,7 +76,10 @@ def test_partial_node_failure_responses_handled_gracefully(
 
     monkeypatch.setattr(httpx.AsyncClient, "get", mock_httpx_get)
 
-    response = test_app.get("/query/")
+    response = test_app.get(
+        "/query/",
+        headers={"Authorization": mock_token},
+    )
 
     assert response.status_code == status.HTTP_207_MULTI_STATUS
     assert response.json() == {
@@ -104,6 +133,8 @@ def test_partial_node_request_failures_handled_gracefully(
     test_app,
     set_valid_test_federation_nodes,
     mocked_single_matching_dataset_result,
+    mock_token,
+    set_mock_verify_token,
     error_to_raise,
     expected_node_message,
     caplog,
@@ -123,7 +154,10 @@ def test_partial_node_request_failures_handled_gracefully(
 
     monkeypatch.setattr(httpx.AsyncClient, "get", mock_httpx_get)
 
-    response = test_app.get("/query/")
+    response = test_app.get(
+        "/query/",
+        headers={"Authorization": mock_token},
+    )
 
     assert response.status_code == status.HTTP_207_MULTI_STATUS
 
@@ -153,6 +187,8 @@ def test_all_nodes_failure_handled_gracefully(
     monkeypatch,
     test_app,
     mock_failed_connection_httpx_get,
+    mock_token,
+    set_mock_verify_token,
     set_valid_test_federation_nodes,
     caplog,
 ):
@@ -164,7 +200,10 @@ def test_all_nodes_failure_handled_gracefully(
         httpx.AsyncClient, "get", mock_failed_connection_httpx_get
     )
 
-    response = test_app.get("/query/")
+    response = test_app.get(
+        "/query/",
+        headers={"Authorization": mock_token},
+    )
 
     # We expect 3 logs here: one warning for each failed node, and one error for the overall failure
     assert len(caplog.records) == 3
@@ -186,6 +225,8 @@ def test_all_nodes_success_handled_gracefully(
     caplog,
     set_valid_test_federation_nodes,
     mocked_single_matching_dataset_result,
+    mock_token,
+    set_mock_verify_token,
 ):
     """
     Test that when queries sent to all nodes succeed, the federation API response includes an overall success status and no errors.
@@ -201,7 +242,10 @@ def test_all_nodes_success_handled_gracefully(
 
     monkeypatch.setattr(httpx.AsyncClient, "get", mock_httpx_get)
 
-    response = test_app.get("/query/")
+    response = test_app.get(
+        "/query/",
+        headers={"Authorization": mock_token},
+    )
 
     assert response.status_code == status.HTTP_200_OK
 
