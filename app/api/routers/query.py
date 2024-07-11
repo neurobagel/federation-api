@@ -3,8 +3,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2
 
-from .. import crud
-from .. import utility as util
+from .. import crud, security
 from ..models import CombinedQueryResponse, QueryModel
 from ..security import verify_token
 
@@ -55,7 +54,7 @@ async def get_query(
     #         detail="Not authenticated",
     #         headers={"WWW-Authenticate": "Bearer"},
     #     )
-    if util.AUTH_ENABLED:
+    if security.AUTH_ENABLED:
         if token is None:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,

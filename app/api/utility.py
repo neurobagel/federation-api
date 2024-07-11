@@ -20,8 +20,6 @@ IS_FEDERATE_REMOTE_PUBLIC_NODES = EnvVar(
     == "true",
 )
 
-AUTH_ENABLED = os.environ.get("NB_AUTH_ENABLED", "True").lower() == "true"
-
 LOCAL_NODE_INDEX_PATH = Path(__file__).parents[2] / "local_nb_nodes.json"
 
 # Stores the names and URLs of all Neurobagel nodes known to the API instance, in the form of {node_url: node_name, ...}
