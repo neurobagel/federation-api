@@ -6,7 +6,7 @@ from google.auth.exceptions import GoogleAuthError
 from google.auth.transport import requests
 from google.oauth2 import id_token
 
-AUTH_ENABLED = os.environ.get("NB_AUTH_ENABLED", "True").lower() == "true"
+AUTH_ENABLED = os.environ.get("NB_ENABLE_AUTH", "True").lower() == "true"
 CLIENT_ID = os.environ.get("NB_QUERY_CLIENT_ID", None)
 
 
@@ -17,7 +17,7 @@ def check_client_id():
     # This however can be a security risk, so we mandate that CLIENT_ID is set.
     if AUTH_ENABLED and CLIENT_ID is None:
         raise ValueError(
-            "Authentication has been enabled (NB_AUTH_ENABLED) but the environment variable NB_QUERY_CLIENT_ID is not set. "
+            "Authentication has been enabled (NB_ENABLE_AUTH) but the environment variable NB_QUERY_CLIENT_ID is not set. "
             "Please set NB_QUERY_CLIENT_ID to the Neurobagel query tool client ID, to verify the audience claim of ID tokens."
         )
 
