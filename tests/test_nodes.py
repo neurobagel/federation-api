@@ -4,15 +4,6 @@ import pytest
 from app.api import utility as util
 
 
-@pytest.fixture
-def disable_auth(monkeypatch):
-    """
-    Disable the authentication requirement for the API to skip startup checks
-    (for when the tested route does not require authentication).
-    """
-    monkeypatch.setattr("app.api.security.AUTH_ENABLED", False)
-
-
 @pytest.mark.parametrize(
     "local_nodes",
     [

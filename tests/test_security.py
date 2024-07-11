@@ -21,6 +21,10 @@ def test_missing_client_id_raises_error_when_auth_enabled(
     assert "NB_QUERY_CLIENT_ID is not set" in str(exc_info.value)
 
 
+# Ignore startup warning that is unrelated to the current test
+@pytest.mark.filterwarnings(
+    "ignore:No local Neurobagel nodes defined or found"
+)
 def test_missing_client_id_ignored_when_auth_disabled(monkeypatch, test_app):
     """Test that a missing client ID does not raise an error when authentication is disabled."""
     monkeypatch.setattr("app.api.security.CLIENT_ID", None)

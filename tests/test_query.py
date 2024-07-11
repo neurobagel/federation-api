@@ -254,3 +254,26 @@ def test_all_nodes_success_handled_gracefully(
     assert response["errors"] == []
     assert len(response["responses"]) == 2
     assert "Requests to all nodes succeeded (2/2)" in caplog.text
+
+
+def test_query_without_token_succeeds_when_auth_disabled(
+    monkeypatch,
+    test_app,
+    set_valid_test_federation_nodes,
+    mocked_single_matching_dataset_result,
+    disable_auth,
+):
+    """
+    Test that when authentication is disabled, a federated query request without a token succeeds.
+    """
+
+    async def mock_httpx_get(self, **kwargs):
+        return httpx.Response(
+            status_code=200, json=[mocked_single_matching_dataset_result]
+        )
+
+    monkeypatch.setattr(httpx.AsyncClient, "get", mock_httpx_get)
+
+    response = test_app.get("/query/")
+
+    assert response.status_code == status.HTTP_200_OK

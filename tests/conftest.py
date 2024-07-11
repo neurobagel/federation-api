@@ -12,6 +12,15 @@ def test_app():
     yield client
 
 
+@pytest.fixture
+def disable_auth(monkeypatch):
+    """
+    Disable the authentication requirement for the API to skip startup checks
+    (for when the tested route does not require authentication).
+    """
+    monkeypatch.setattr("app.api.security.AUTH_ENABLED", False)
+
+
 @pytest.fixture(scope="function")
 def set_valid_test_federation_nodes(monkeypatch):
     """Set two correctly formatted federation nodes for a test function (mocks the result of reading/parsing available public and local nodes on startup)."""
