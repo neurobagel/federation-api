@@ -4,6 +4,32 @@ from fastapi import HTTPException
 from app.api.security import verify_token
 
 
+def test_missing_client_id_raises_error_when_auth_enabled(
+    monkeypatch, test_app
+):
+    """Test that a missing client ID raises an error on startup when authentication is enabled."""
+    # We're using what should be default values of CLIENT_ID and AUTH_ENABLED here
+    # (if the corresponding environment variables are unset),
+    # but we set the values explicitly here for clarity
+    monkeypatch.setattr("app.api.security.CLIENT_ID", None)
+    monkeypatch.setattr("app.api.security.AUTH_ENABLED", True)
+
+    with pytest.raises(ValueError) as exc_info:
+        with test_app:
+            pass
+
+    assert "NB_QUERY_CLIENT_ID is not set" in str(exc_info.value)
+
+
+def test_missing_client_id_ignored_when_auth_disabled(monkeypatch, test_app):
+    """Test that a missing client ID does not raise an error when authentication is disabled."""
+    monkeypatch.setattr("app.api.security.CLIENT_ID", None)
+    monkeypatch.setattr("app.api.security.AUTH_ENABLED", False)
+
+    with test_app:
+        pass
+
+
 @pytest.mark.parametrize(
     "invalid_token",
     ["Bearer faketoken", "Bearer", "faketoken", "fakescheme faketoken"],
