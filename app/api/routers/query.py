@@ -19,6 +19,7 @@ oauth2_scheme = OAuth2(
             "authorizationUrl": "https://accounts.google.com/o/oauth2/auth",
         }
     },
+    # Don't automatically error out when request is not authenticated, to support optional authentication
     auto_error=False,
 )
 # NOTE: Can also explicitly use OpenID Connect because Google supports it - results in the same behavior as the OAuth2 scheme above.
