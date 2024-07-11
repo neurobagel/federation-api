@@ -23,6 +23,7 @@ def verify_token(token: str):
     try:
         # Extract the token from the "Bearer" scheme
         # (See https://github.com/tiangolo/fastapi/blob/master/fastapi/security/oauth2.py#L473-L485)
+        # TODO: Check also if scheme of token is "Bearer"?
         _, param = get_authorization_scheme_param(token)
         id_info = id_token.verify_oauth2_token(
             param, requests.Request(), CLIENT_ID
