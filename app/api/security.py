@@ -18,7 +18,7 @@ def check_client_id():
     if AUTH_ENABLED and CLIENT_ID is None:
         raise ValueError(
             "Authentication has been enabled (NB_ENABLE_AUTH) but the environment variable NB_QUERY_CLIENT_ID is not set. "
-            "Please set NB_QUERY_CLIENT_ID to the Neurobagel query tool client ID, to verify the audience claim of ID tokens."
+            "Please set NB_QUERY_CLIENT_ID to the Google client ID for your Neurobagel query tool deployment, to verify the audience claim of ID tokens."
         )
 
 
