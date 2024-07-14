@@ -33,7 +33,7 @@ def verify_token(token: str):
         id_info = id_token.verify_oauth2_token(
             param, requests.Request(), CLIENT_ID
         )
-        # TODO: Remove print statement - just for testing
+        # TODO: Remove print statement or turn into logging
         print("Token verified: ", id_info)
     except (GoogleAuthError, ValueError) as exc:
         raise HTTPException(
