@@ -52,17 +52,9 @@ def test_invalid_token_raises_error(invalid_token):
     [{}, {"Authorization": ""}, {"badheader": "badvalue"}],
 )
 def test_query_with_malformed_auth_header_fails(
-    test_app, monkeypatch, invalid_auth_header
+    test_app, set_mock_verify_token, invalid_auth_header
 ):
     """Test that a request to the /query route with a missing or malformed authorization header, fails ."""
-
-    # Mock verify_token function since we don't want to actually verify the token in this test
-    def mock_verify_token(token):
-        return None
-
-    monkeypatch.setattr(
-        "app.api.routers.query.verify_token", mock_verify_token
-    )
 
     response = test_app.get(
         "/query/",
