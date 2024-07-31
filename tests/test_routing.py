@@ -3,10 +3,14 @@ import pytest
 from fastapi import status
 
 
-def test_root(test_app, set_valid_test_federation_nodes):
+@pytest.mark.parametrize(
+    "root_path",
+    ["/", ""],
+)
+def test_root(test_app, set_valid_test_federation_nodes, root_path):
     """Given a GET request to the root endpoint, Check for 200 status and expected content."""
 
-    response = test_app.get("/")
+    response = test_app.get(root_path, follow_redirects=False)
 
     assert response.status_code == status.HTTP_200_OK
     assert all(
