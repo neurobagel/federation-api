@@ -35,7 +35,7 @@ def test_request_without_trailing_slash_not_redirected(
     disable_auth,
     valid_route,
 ):
-    """Test that a request to the /query route is not redirected to have a trailing slash."""
+    """Test that a request to a route without a / is not redirected to have a trailing slash."""
 
     async def mock_httpx_get(self, **kwargs):
         return httpx.Response(
@@ -57,7 +57,7 @@ def test_request_including_trailing_slash_fails(
 ):
     """
     Test that a request to routes including a trailing slash, where none is expected,
-    is *not* redirected to exclude the slash, and fails with a 404.
+    is *not* redirected to exclude the slash, and returns a 404.
     """
     response = test_app.get(invalid_route)
     assert response.status_code == status.HTTP_404_NOT_FOUND
