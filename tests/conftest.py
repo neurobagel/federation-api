@@ -12,7 +12,13 @@ def test_app():
     yield client
 
 
-@pytest.fixture
+@pytest.fixture()
+def enable_auth(monkeypatch):
+    """Enable the authentication requirement for the API."""
+    monkeypatch.setattr("app.api.security.AUTH_ENABLED", True)
+
+
+@pytest.fixture()
 def disable_auth(monkeypatch):
     """
     Disable the authentication requirement for the API to skip startup checks
