@@ -6,7 +6,7 @@
 
 </div>
 
-Please refer to our [**official documentation**](https://neurobagel.org/federate/) for more information on Neurobagel federation and how to use the federation API.
+Please refer to our [**official documentation**]([https://neurobagel.org/federate/](https://neurobagel.org/api/)) for more information on Neurobagel federation and how to use the federation API.
 
 ## Launching the API
 ### 1. Set the local Neurobagel nodes to federate over
