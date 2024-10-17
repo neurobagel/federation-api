@@ -202,6 +202,7 @@ async def get_pipeline_versions(pipeline_term: str):
     dict
         Dictionary where the key is the pipeline term and the value is the list of unique available (i.e. used) versions of the pipeline.
     """
+    # TODO: The logic in this function is very similar to get_terms. Consider refactoring to reduce code duplication.
     node_errors = []
     all_pipe_versions = []
 
