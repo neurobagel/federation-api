@@ -7,8 +7,9 @@ from .. import crud
 # (see https://fastapi.tiangolo.com/advanced/response-change-status-code/ for more info).
 #
 # TODO: if our response model for fully successful vs. not fully successful responses grows more complex in the future,
-# consider additionally using https://fastapi.tiangolo.com/advanced/additional-responses/#additional-response-with-model to document
-# example responses for different status codes in the OpenAPI docs (less relevant for now since there is only one response model).
+# consider additionally using https://fastapi.tiangolo.com/advanced/additional-responses/#additional-response-with-model
+# when defining API routes to document example responses for different status codes in the OpenAPI docs
+# (less relevant for now since there is only one response model).
 def create_get_instances_handler(attributes_base_path: str):
     """
     Create the handler (path function) for a federated GET request to the root `/` subpath of

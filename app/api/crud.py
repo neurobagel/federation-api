@@ -155,6 +155,9 @@ async def get_instances(attribute_base_path: str):
     """
     node_errors = []
     unique_terms_dict = {}
+    # We want to always provide the URI of the requested attribute in a successful federated response,
+    # but cannot rely on it always being available in the node responses (e.g., if all nodes fail),
+    # so we define it locally based on the requested attribute base path.
     attribute_uri = util.RESOURCE_URI_MAP[attribute_base_path]
 
     tasks = [
