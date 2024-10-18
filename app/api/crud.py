@@ -141,12 +141,12 @@ async def get(
 
 async def get_instances(attribute_base_path: str):
     """
-    Makes a GET request to all available Neurobagel node APIs using send_get_request utility function where the only parameter is a data element URI.
+    Makes a GET request to the root subpath of the specified attribute router of all available Neurobagel n-APIs.
 
     Parameters
     ----------
-    data_element_URI : str
-        Controlled term of neurobagel class for which all the available terms should be retrieved.
+    attribute_base_path : str
+        Base path corresponding to a specific Neurobagel class for which all the available instances should be retrieved, e.g., "assessments"
 
     Returns
     -------
@@ -164,7 +164,7 @@ async def get_instances(attribute_base_path: str):
     ]
     responses = await asyncio.gather(*tasks, return_exceptions=True)
 
-    assessment_term = None
+    attribute_controlled_term = None
     for (node_url, node_name), response in zip(
         util.FEDERATION_NODES.items(), responses
     ):
@@ -176,13 +176,17 @@ async def get_instances(attribute_base_path: str):
                 f"Request to node {node_name} ({node_url}) did not succeed: {response.detail}"
             )
         else:
-            # Build the dictionary of unique term-label pairings from all nodes
-            if not assessment_term:
-                assessment_term = next(iter(response), None)
-            for term_dict in response[assessment_term]:
+            # NOTE: We return only the unique attribute instances from all nodes, based on the instance's *term URL*.
+            # This means that if the same instance term appears in multiple nodes with potentially different human-readable labels,
+            # only one version (term-label pairing) will be included in the response.
+            if not attribute_controlled_term:
+                attribute_controlled_term = next(iter(response), None)
+            for term_dict in response[attribute_controlled_term]:
                 unique_terms_dict[term_dict["TermURL"]] = term_dict
 
-    cross_node_results = {assessment_term: list(unique_terms_dict.values())}
+    cross_node_results = {
+        attribute_controlled_term: list(unique_terms_dict.values())
+    }
 
     return build_combined_response(
         total_nodes=len(util.FEDERATION_NODES),
