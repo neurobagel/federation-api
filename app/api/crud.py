@@ -155,6 +155,7 @@ async def get_instances(attribute_base_path: str):
     """
     node_errors = []
     unique_terms_dict = {}
+    attribute_uri = util.RESOURCE_URI_MAP[attribute_base_path]
 
     tasks = [
         util.send_get_request(
@@ -164,7 +165,6 @@ async def get_instances(attribute_base_path: str):
     ]
     responses = await asyncio.gather(*tasks, return_exceptions=True)
 
-    attribute_controlled_term = None
     for (node_url, node_name), response in zip(
         util.FEDERATION_NODES.items(), responses
     ):
@@ -179,14 +179,10 @@ async def get_instances(attribute_base_path: str):
             # NOTE: We return only the unique attribute instances from all nodes, based on the instance's *term URL*.
             # This means that if the same instance term appears in multiple nodes with potentially different human-readable labels,
             # only one version (term-label pairing) will be included in the response.
-            if not attribute_controlled_term:
-                attribute_controlled_term = next(iter(response), None)
-            for term_dict in response[attribute_controlled_term]:
+            for term_dict in response[attribute_uri]:
                 unique_terms_dict[term_dict["TermURL"]] = term_dict
 
-    cross_node_results = {
-        attribute_controlled_term: list(unique_terms_dict.values())
-    }
+    cross_node_results = {attribute_uri: list(unique_terms_dict.values())}
 
     return build_combined_response(
         total_nodes=len(util.FEDERATION_NODES),
