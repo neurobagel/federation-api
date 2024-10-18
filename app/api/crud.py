@@ -139,7 +139,7 @@ async def get(
     )
 
 
-async def get_terms(data_element_URI: str):
+async def get_instances(attribute_base_path: str):
     """
     Makes a GET request to all available Neurobagel node APIs using send_get_request utility function where the only parameter is a data element URI.
 
@@ -158,12 +158,13 @@ async def get_terms(data_element_URI: str):
 
     tasks = [
         util.send_get_request(
-            node_url + "attributes/" + data_element_URI,
+            url=node_url + attribute_base_path + "/",
         )
         for node_url in util.FEDERATION_NODES
     ]
     responses = await asyncio.gather(*tasks, return_exceptions=True)
 
+    assessment_term = None
     for (node_url, node_name), response in zip(
         util.FEDERATION_NODES.items(), responses
     ):
@@ -176,10 +177,12 @@ async def get_terms(data_element_URI: str):
             )
         else:
             # Build the dictionary of unique term-label pairings from all nodes
-            for term_dict in response[data_element_URI]:
+            if not assessment_term:
+                assessment_term = next(iter(response), None)
+            for term_dict in response[assessment_term]:
                 unique_terms_dict[term_dict["TermURL"]] = term_dict
 
-    cross_node_results = {data_element_URI: list(unique_terms_dict.values())}
+    cross_node_results = {assessment_term: list(unique_terms_dict.values())}
 
     return build_combined_response(
         total_nodes=len(util.FEDERATION_NODES),
@@ -207,7 +210,9 @@ async def get_pipeline_versions(pipeline_term: str):
     all_pipe_versions = []
 
     tasks = [
-        util.send_get_request(f"{node_url}pipelines/{pipeline_term}/versions")
+        util.send_get_request(
+            url=f"{node_url}pipelines/{pipeline_term}/versions"
+        )
         for node_url in util.FEDERATION_NODES
     ]
     responses = await asyncio.gather(*tasks, return_exceptions=True)
