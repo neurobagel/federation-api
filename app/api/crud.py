@@ -210,9 +210,7 @@ async def get_pipeline_versions(pipeline_term: str):
     all_pipe_versions = []
 
     tasks = [
-        util.send_get_request(
-            url=f"{node_url}pipelines/{pipeline_term}/versions"
-        )
+        util.send_get_request(f"{node_url}pipelines/{pipeline_term}/versions")
         for node_url in util.FEDERATION_NODES
     ]
     responses = await asyncio.gather(*tasks, return_exceptions=True)
