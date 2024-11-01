@@ -2,7 +2,6 @@ import httpx
 import pytest
 from starlette.testclient import TestClient
 
-from app.api import security
 from app.api import utility as util
 from app.main import app
 
@@ -44,7 +43,8 @@ def set_mock_verify_and_extract_token(
 ):
     """Set the verify_token function to a mock that does not raise any exceptions."""
     monkeypatch.setattr(
-        security, "verify_and_extract_token", mock_verify_and_extract_token
+        "app.api.routers.query.verify_and_extract_token",
+        mock_verify_and_extract_token,
     )
 
 
