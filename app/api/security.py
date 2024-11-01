@@ -22,7 +22,7 @@ def check_client_id():
         )
 
 
-def verify_token(token: str) -> str:
+def verify_and_extract_token(token: str) -> str:
     """
     Verify and return the Google ID token with the authorization scheme stripped.
     Raise an HTTPException if the token is invalid.
@@ -32,13 +32,13 @@ def verify_token(token: str) -> str:
         # Extract the token from the "Bearer" scheme
         # (See https://github.com/tiangolo/fastapi/blob/master/fastapi/security/oauth2.py#L473-L485)
         # TODO: Check also if scheme of token is "Bearer"?
-        _, param = get_authorization_scheme_param(token)
+        _, extracted_token = get_authorization_scheme_param(token)
         id_info = id_token.verify_oauth2_token(
-            param, requests.Request(), CLIENT_ID
+            extracted_token, requests.Request(), CLIENT_ID
         )
         # TODO: Remove print statement or turn into logging
         print("Token verified: ", id_info)
-        return param
+        return extracted_token
     except (GoogleAuthError, ValueError) as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
