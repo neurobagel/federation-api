@@ -61,7 +61,7 @@ async def get_query(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Not authenticated",
             )
-        verify_token(token)
+        token = verify_token(token)
 
     response_dict = await crud.get(
         query.min_age,

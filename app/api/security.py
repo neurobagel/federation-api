@@ -22,8 +22,11 @@ def check_client_id():
         )
 
 
-def verify_token(token: str):
-    """Verify the Google ID token. Raise an HTTPException if the token is invalid."""
+def verify_token(token: str) -> str:
+    """
+    Verify and return the Google ID token with the authorization scheme stripped.
+    Raise an HTTPException if the token is invalid.
+    """
     # Adapted from https://developers.google.com/identity/gsi/web/guides/verify-google-id-token#python
     try:
         # Extract the token from the "Bearer" scheme
@@ -35,6 +38,7 @@ def verify_token(token: str):
         )
         # TODO: Remove print statement or turn into logging
         print("Token verified: ", id_info)
+        return param
     except (GoogleAuthError, ValueError) as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
