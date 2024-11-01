@@ -1,5 +1,6 @@
 import pytest
 from fastapi import HTTPException
+from google.oauth2 import id_token
 
 from app.api.security import verify_token
 
@@ -69,3 +70,35 @@ def test_query_with_malformed_auth_header_fails(
     )
 
     assert response.status_code == 403
+
+
+def test_verified_token_returned_without_auth_scheme(monkeypatch, enable_auth):
+    """
+    Test that when a token is valid, verify_token correctly returns the token with the authorization scheme stripped.
+    """
+    mock_valid_token = "Bearer foo"
+    mock_id_info = {
+        "iss": "https://accounts.google.com",
+        "azp": "123abc.apps.googleusercontent.com",
+        "aud": "123abc.apps.googleusercontent.com",
+        "sub": "1234567890",
+        "email": "jane.doe@gmail.com",
+        "email_verified": True,
+        "nbf": 1730476622,
+        "name": "Jane Doe",
+        "picture": "https://lh3.googleusercontent.com/a/example1234567890",
+        "given_name": "Jane",
+        "family_name": "Doe",
+        "iat": 1730476922,
+        "exp": 1730480522,
+        "jti": "123e4567-e89b",
+    }
+
+    def mock_oauth2_verify_token(param, request, client_id, **kwargs):
+        return mock_id_info
+
+    monkeypatch.setattr(
+        id_token, "verify_oauth2_token", mock_oauth2_verify_token
+    )
+
+    assert verify_token(mock_valid_token) == "foo"
