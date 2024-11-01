@@ -53,7 +53,7 @@ def test_invalid_token_raises_error(invalid_token):
 )
 def test_query_with_malformed_auth_header_fails(
     test_app,
-    set_mock_verify_token,
+    set_mock_verify_and_extract_token,
     enable_auth,
     invalid_auth_header,
     monkeypatch,
