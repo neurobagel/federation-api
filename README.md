@@ -2,7 +2,12 @@
 
 # Federation API
 
-[![Coverage Status](https://coveralls.io/repos/github/neurobagel/federation-api/badge.svg?branch=main)](https://coveralls.io/github/neurobagel/federation-api?branch=main)
+[![Tests](https://img.shields.io/github/actions/workflow/status/neurobagel/federation-api/test.yaml?color=BDB76B&label=test&style=flat)](https://github.com/neurobagel/federation-api/actions/workflows/test.yaml)
+[![codecov](https://codecov.io/gh/neurobagel/federation-api/graph/badge.svg?token=B827PI9W1U)](https://codecov.io/gh/neurobagel/federation-api)
+[![License](https://img.shields.io/github/license/neurobagel/federation-api?color=CD5C5C&style=flat)](LICENSE)
+[![Python versions](https://img.shields.io/badge/Python-3.10%20%7C%203.11-blue?style=flat)](https://www.python.org)
+
+
 
 </div>
 
