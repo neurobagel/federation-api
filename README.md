@@ -6,6 +6,9 @@
 [![codecov](https://codecov.io/gh/neurobagel/federation-api/graph/badge.svg?token=B827PI9W1U)](https://codecov.io/gh/neurobagel/federation-api)
 [![License](https://img.shields.io/github/license/neurobagel/federation-api?color=CD5C5C&style=flat)](LICENSE)
 [![Python versions](https://img.shields.io/badge/Python-3.10%20%7C%203.11-blue?style=flat)](https://www.python.org)
+![Docker Image Version (tag)](https://img.shields.io/docker/v/neurobagel/federation_api/latest?logo=docker)
+
+
 
 
 
