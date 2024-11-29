@@ -19,7 +19,16 @@ def check_client_id():
         )
 
 
-def verify_and_extract_token(token: str) -> str:
+def extract_token(token: str) -> str:
+    """Extract the token from the authorization header."""
+    # Extract the token from the "Bearer" scheme
+    # (See https://github.com/tiangolo/fastapi/blob/master/fastapi/security/oauth2.py#L473-L485)
+    # TODO: Check also if scheme of token is "Bearer"?
+    _, extracted_token = get_authorization_scheme_param(token)
+    return extracted_token
+
+
+def verify_token(token: str) -> str:
     """
     Verify the ID token against the identity provider public keys, and return the token with the authorization scheme stripped.
     Raise an HTTPException if the token is invalid.
@@ -28,11 +37,7 @@ def verify_and_extract_token(token: str) -> str:
     issuer = "https://neurobagel.ca.auth0.com/"
 
     try:
-        # Extract the token from the "Bearer" scheme
-        # (See https://github.com/tiangolo/fastapi/blob/master/fastapi/security/oauth2.py#L473-L485)
-        # TODO: Check also if scheme of token is "Bearer"?
-        _, extracted_token = get_authorization_scheme_param(token)
-
+        extracted_token = extract_token(token)
         # Determine which key was used to sign the token
         # Adapted from https://pyjwt.readthedocs.io/en/stable/usage.html#retrieve-rsa-signing-keys-from-a-jwks-endpoint
         jwks_client = PyJWKClient(keys_url)
