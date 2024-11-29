@@ -20,7 +20,10 @@ def check_client_id():
 
 
 def extract_token(token: str) -> str:
-    """Extract the token from the authorization header."""
+    """
+    Extract the token from the authorization header.
+    This ensures that it is passed on to downstream APIs without the authorization scheme.
+    """
     # Extract the token from the "Bearer" scheme
     # (See https://github.com/tiangolo/fastapi/blob/master/fastapi/security/oauth2.py#L473-L485)
     # TODO: Check also if scheme of token is "Bearer"?
