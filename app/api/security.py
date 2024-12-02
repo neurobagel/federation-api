@@ -50,7 +50,7 @@ def verify_token(token: str) -> str:
         signing_key = JWKS_CLIENT.get_signing_key_from_jwt(extracted_token)
 
         # https://pyjwt.readthedocs.io/en/stable/api.html#jwt.decode
-        id_info = jwt.decode(
+        jwt.decode(
             jwt=extracted_token,
             key=signing_key,
             options={
@@ -60,9 +60,6 @@ def verify_token(token: str) -> str:
             audience=CLIENT_ID,
             issuer=ISSUER,
         )
-
-        # TODO: Remove print statement or turn into logging
-        print("Token verified: ", id_info)
         return extracted_token
     except (PyJWTError, ValueError) as exc:
         raise HTTPException(
