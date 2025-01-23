@@ -19,8 +19,7 @@ def test_root(test_app, set_valid_test_federation_nodes, route, monkeypatch):
     assert all(
         substring in response.text
         for substring in [
-            "Welcome to",
-            "Neurobagel",
+            "Neurobagel Federation API",
             '<a href="/docs">API documentation</a>',
         ]
     )
@@ -84,6 +83,29 @@ def test_docs_work_using_defined_root_path(
     """
 
     monkeypatch.setattr(app, "root_path", "/fapi/v1")
+    docs_response = test_app.get(f"{test_route}/docs", follow_redirects=False)
+    schema_response = test_app.get(
+        f"{test_route}/openapi.json", follow_redirects=False
+    )
+    assert docs_response.status_code == expected_status_code
+    assert schema_response.status_code == expected_status_code
+
+
+@pytest.mark.parametrize(
+    "test_route,expected_status_code",
+    [("", 200), ("/fapi/", 200), ("/fapi", 404)],
+)
+def test_docs_when_root_path_includes_trailing_slash(
+    test_app, test_route, expected_status_code, monkeypatch
+):
+    """
+    Test that when the API root_path is set with a trailing slash, the interactive docs and OpenAPI schema are only reachable
+    using a path prefix with the extra trailing slash also included, or without the prefix entirely.
+
+    This provides a sanity check that the app does not ignore/redirect trailing slashes in the root_path when requests are received.
+    """
+
+    monkeypatch.setattr(app, "root_path", "/fapi/")
     docs_response = test_app.get(f"{test_route}/docs", follow_redirects=False)
     schema_response = test_app.get(
         f"{test_route}/openapi.json", follow_redirects=False
