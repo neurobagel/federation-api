@@ -156,9 +156,17 @@ def test_node_request_urls_do_not_have_trailing_slash(path):
     """
     Ensure that URLs used to forward requests to node APIs do not include a trailing slash.
     """
-    assert crud.build_node_request_urls(
-        ["https://node1.institute.org/", "https://node2.institute.org/"], path
-    ) == [
-        f"https://node1.institute.org/{path}",
-        f"https://node2.institute.org/{path}",
+    # TODO: Revisit once root_path is tested in production -
+    # the example node URLs below assume that validate_query_node_url_list has already been called,
+    # which will have appended trailing slashes to the node URLs if they were missing
+    node_request_urls = crud.build_node_request_urls(
+        node_urls=[
+            "https://api.node1.institute.org/",
+            "https://node2.institute.org/api/",
+        ],
+        path=path,
+    )
+    assert node_request_urls == [
+        f"https://api.node1.institute.org/{path}",
+        f"https://node2.institute.org/api/{path}",
     ]
