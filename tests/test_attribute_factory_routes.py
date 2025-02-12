@@ -42,7 +42,7 @@ def test_get_instances_with_duplicate_terms_handled(
 
     monkeypatch.setattr(httpx.AsyncClient, "get", mock_httpx_get)
 
-    response = test_app.get("/assessments/")
+    response = test_app.get("/assessments")
 
     response_object = response.json()
     found_instances = response_object["responses"]["nb:Assessment"]
@@ -94,7 +94,7 @@ def test_partially_failed_get_instances_handled_gracefully(
 
     monkeypatch.setattr(httpx.AsyncClient, "get", mock_httpx_get)
 
-    response = test_app.get("/assessments/")
+    response = test_app.get("/assessments")
 
     assert response.status_code == status.HTTP_207_MULTI_STATUS
 
@@ -127,7 +127,7 @@ def test_fully_failed_get_instances_handled_gracefully(
         httpx.AsyncClient, "get", mock_failed_connection_httpx_get
     )
 
-    response = test_app.get("/assessments/")
+    response = test_app.get("/assessments")
 
     assert response.status_code == status.HTTP_207_MULTI_STATUS
     # We expect several warnings from logging
