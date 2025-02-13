@@ -152,14 +152,14 @@ async def get(
     )
 
 
-async def get_instances(attribute_base_path: str):
+async def get_instances(attribute_path: str):
     """
     Makes a GET request to the root subpath of the specified attribute router of all available Neurobagel n-APIs.
 
     Parameters
     ----------
-    attribute_base_path : str
-        Base path corresponding to a specific Neurobagel class for which all the available instances should be retrieved, e.g., "assessments"
+    attribute_path : str
+        Path corresponding to a specific Neurobagel class for which all the available instances should be retrieved, e.g., "assessments"
 
     Returns
     -------
@@ -170,13 +170,13 @@ async def get_instances(attribute_base_path: str):
     unique_terms_dict = {}
     # We want to always provide the URI of the requested attribute in a successful federated response,
     # but cannot rely on it always being available in the node responses (e.g., if all nodes fail),
-    # so we define it locally based on the requested attribute base path.
-    attribute_uri = util.RESOURCE_URI_MAP[attribute_base_path]
+    # so we define it locally based on the requested attribute path.
+    attribute_uri = util.RESOURCE_URI_MAP[attribute_path]
 
     tasks = [
         util.send_get_request(url=node_request_url)
         for node_request_url in build_node_request_urls(
-            util.FEDERATION_NODES, attribute_base_path
+            util.FEDERATION_NODES, attribute_path
         )
     ]
     responses = await asyncio.gather(*tasks, return_exceptions=True)
