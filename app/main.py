@@ -97,8 +97,8 @@ def root(request: Request):
         <body>
             <div class="container">
                 <img src="https://raw.githubusercontent.com/neurobagel/documentation/main/docs/imgs/logo/neurobagel_logo.png" alt="Neurobagel Logo" class="logo" width="144" height="144">
-                <h1>Welcome to the Neurobagel REST API!</h1>
-                <p>Please visit the <a href="/docs">documentation</a> to view available API endpoints.</p>
+                <h1>Welcome to the Neurobagel Federation API!</h1>
+                <p>Please visit the <a href="/docs">API documentation</a> to view available API endpoints.</p>
             </div>
         </body>
     </html>
