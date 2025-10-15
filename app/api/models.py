@@ -9,8 +9,8 @@ from pydantic import BaseModel, Field
 CONTROLLED_TERM_REGEX = r"^[a-zA-Z]+[:]\S+$"
 
 
-class QueryModel(BaseModel):
-    """Data model and dependency for API that stores the query parameters to be accepted and validated."""
+class BaseQueryModel(BaseModel):
+    """Data model for standardized variable-based query parameters."""
 
     min_age: float = None
     max_age: float = None
@@ -22,13 +22,29 @@ class QueryModel(BaseModel):
     image_modal: str = None
     pipeline_name: str = None
     pipeline_version: str = None
+
+
+class QueryModel(BaseQueryModel):
     # TODO: Replace default value with union of local and public nodes once https://github.com/neurobagel/federation-api/issues/28 is merged
     # syntax from https://github.com/tiangolo/fastapi/issues/4445#issuecomment-1117632409
     node_url: list[str] | None = Field(Query(default=[]))
 
 
-class CohortQueryResponse(BaseModel):
-    """Data model for query results for one matching dataset (i.e., a cohort)."""
+class NodeDatasets(BaseModel):
+    """Data model for specifying datasets to query within a specific node."""
+
+    node_url: str
+    dataset_uuids: list[str]
+
+
+class SubjectsQueryModel(BaseQueryModel):
+    """Data model a for POST /subjects query"""
+
+    nodes: list[NodeDatasets]
+
+
+class SubjectsQueryResponse(BaseModel):
+    """Data model for subject-level results for one dataset matching a given query."""
 
     node_name: str
     dataset_uuid: str
@@ -62,7 +78,7 @@ class CombinedQueryResponse(BaseModel):
     """Data model for the combined query results of all matching datasets across all queried nodes."""
 
     errors: list[NodeError]
-    responses: list[CohortQueryResponse]
+    responses: list[SubjectsQueryResponse]
     nodes_response_status: NodesResponseStatus
 
 
