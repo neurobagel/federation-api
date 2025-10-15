@@ -34,13 +34,13 @@ class NodeDatasets(BaseModel):
     """Data model for specifying datasets to query within a specific node."""
 
     node_url: str
-    dataset_uuids: list[str]
+    dataset_uuids: list[str] | None = None
 
 
 class SubjectsQueryModel(BaseQueryModel):
     """Data model a for POST /subjects query"""
 
-    nodes: list[NodeDatasets]
+    nodes: list[NodeDatasets] | None = None
 
 
 class SubjectsQueryResponse(BaseModel):

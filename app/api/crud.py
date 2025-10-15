@@ -53,7 +53,7 @@ async def query_records(
     image_modal: str,
     pipeline_name: str,
     pipeline_version: str,
-    node_urls: list,
+    nodes: list,
     token: str | None = None,
 ) -> dict:
     """
@@ -83,7 +83,7 @@ async def query_records(
         Name of pipeline run on subject scans.
     pipeline_version : str
         Version of pipeline run on subject scans.
-    node_urls : list
+    nodes : list
         List of Neurobagel nodes (and optionally datasets) to restrict the query to.
 
     Returns
@@ -94,6 +94,11 @@ async def query_records(
     """
     cross_node_results = []
     node_errors = []
+
+    if isinstance(nodes[0], dict):
+        node_urls = [node["node_url"] for node in nodes]
+    else:
+        node_urls = nodes
 
     node_urls = util.validate_query_node_url_list(node_urls)
 
@@ -122,11 +127,11 @@ async def query_records(
 
     tasks = [
         util.send_get_request(node_request_url, params, token)
-        for node_request_url in build_node_request_urls(node_urls, "query")
+        for node_request_url in build_node_request_urls(nodes, "query")
     ]
     responses = await asyncio.gather(*tasks, return_exceptions=True)
 
-    for node_url, response in zip(node_urls, responses):
+    for node_url, response in zip(nodes, responses):
         node_name = util.FEDERATION_NODES[node_url]
         if isinstance(response, HTTPException):
             node_errors.append(
@@ -141,7 +146,7 @@ async def query_records(
             cross_node_results.extend(response)
 
     return build_combined_response(
-        total_nodes=len(node_urls),
+        total_nodes=len(nodes),
         cross_node_results=cross_node_results,
         node_errors=node_errors,
     )
