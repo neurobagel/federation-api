@@ -41,20 +41,9 @@ async def post_subjects_query(
             )
         token = verify_token(token)
 
-    # TODO: Update CRUD function
-    response_dict = await crud.get(
-        query.min_age,
-        query.max_age,
-        query.sex,
-        query.diagnosis,
-        query.min_num_imaging_sessions,
-        query.min_num_phenotypic_sessions,
-        query.assessment,
-        query.image_modal,
-        query.pipeline_name,
-        query.pipeline_version,
-        query.node_url,
-        token,
+    response_dict = await crud.query_records(
+        **query.dict(),
+        token=token,
     )
 
     if response_dict["errors"]:

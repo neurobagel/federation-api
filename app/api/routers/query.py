@@ -65,7 +65,7 @@ async def get_query(
             )
         token = verify_token(token)
 
-    response_dict = await crud.get(
+    response_dict = await crud.query_records(
         query.min_age,
         query.max_age,
         query.sex,

@@ -42,7 +42,7 @@ def build_combined_response(
     return content
 
 
-async def get(
+async def query_records(
     min_age: float,
     max_age: float,
     sex: str,
@@ -53,7 +53,7 @@ async def get(
     image_modal: str,
     pipeline_name: str,
     pipeline_version: str,
-    node_urls: list[str],
+    node_urls: list,
     token: str | None = None,
 ) -> dict:
     """
@@ -61,6 +61,8 @@ async def get(
 
     Parameters
     ----------
+    token : str, optional
+        ID token for authentication, by default None
     min_age : float
         Minimum age of subject.
     max_age : float
@@ -81,10 +83,8 @@ async def get(
         Name of pipeline run on subject scans.
     pipeline_version : str
         Version of pipeline run on subject scans.
-    node_urls : list[str]
-        List of Neurobagel nodes to send the query to.
-    token : str, optional
-        ID token for authentication, by default None
+    node_urls : list
+        List of Neurobagel nodes (and optionally datasets) to restrict the query to.
 
     Returns
     -------
