@@ -228,8 +228,8 @@ def test_validate_queried_nodes(monkeypatch, raw_nodes, expected_nodes):
         util,
         "FEDERATION_NODES",
         {
-            "https://firstknownnode.org/node": "My First Node",
-            "https://secondknownnode.org/node": "My Second Node",
+            "https://firstknownnode.org/node/": "My First Node",
+            "https://secondknownnode.org/node/": "My Second Node",
         },
     )
 
