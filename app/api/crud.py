@@ -47,17 +47,7 @@ def build_combined_response(
 
 
 async def get(
-    min_age: float,
-    max_age: float,
-    sex: str,
-    diagnosis: str,
-    min_num_imaging_sessions: int,
-    min_num_phenotypic_sessions: int,
-    assessment: str,
-    image_modal: str,
-    pipeline_name: str,
-    pipeline_version: str,
-    node_urls: list[str],
+    query: dict,
     token: str | None = None,
 ) -> dict:
     """
@@ -65,67 +55,26 @@ async def get(
 
     Parameters
     ----------
-    min_age : float
-        Minimum age of subject.
-    max_age : float
-        Maximum age of subject.
-    sex : str
-        Sex of subject.
-    diagnosis : str
-        Subject diagnosis.
-    min_num_imaging_sessions : int
-        Subject minimum number of imaging sessions.
-    min_num_phenotypic_sessions : int
-        Subject minimum number of phenotypic sessions.
-    assessment : str
-        Non-imaging assessment completed by subjects.
-    image_modal : str
-        Imaging modality of subject scans.
-    pipeline_name : str
-        Name of pipeline run on subject scans.
-    pipeline_version : str
-        Version of pipeline run on subject scans.
-    node_urls : list
-        List of Neurobagel nodes to send the query to.
+    query : dict
+        Dictionary of Neurobagel query parameters, including a node_url list.
     token : str, optional
         ID token for authentication, by default None
 
     Returns
     -------
     httpx.response
-        Response of the POST request.
+        Response of the GET request.
 
     """
     cross_node_results = []
     node_errors = []
 
-    node_urls = util.validate_query_node_url_list(node_urls)
+    node_urls = util.validate_query_node_url_list(query.get("node_url"))
 
-    # Node API query parameters
-    params = {}
-    if min_age:
-        params["min_age"] = min_age
-    if max_age:
-        params["max_age"] = max_age
-    if sex:
-        params["sex"] = sex
-    if diagnosis:
-        params["diagnosis"] = diagnosis
-    if min_num_imaging_sessions:
-        params["min_num_imaging_sessions"] = min_num_imaging_sessions
-    if min_num_phenotypic_sessions:
-        params["min_num_phenotypic_sessions"] = min_num_phenotypic_sessions
-    if assessment:
-        params["assessment"] = assessment
-    if image_modal:
-        params["image_modal"] = image_modal
-    if pipeline_name:
-        params["pipeline_name"] = pipeline_name
-    if pipeline_version:
-        params["pipeline_version"] = pipeline_version
+    query.pop("node_url", None)
 
     tasks = [
-        util.send_get_request(node_request_url, params, token)
+        util.send_get_request(node_request_url, query, token)
         for node_request_url in build_node_request_urls(node_urls, "query")
     ]
     responses = await asyncio.gather(*tasks, return_exceptions=True)
@@ -152,23 +101,28 @@ async def get(
 
 
 async def query_records(
-    # We accept a dict instead of a SubjectsQueryModel to make it easier to inspect
+    # We accept a dict instead of a Pydantic model to make it more flexible to inspect
     # and modify the node list as a list of dictionaries (rather than NodeDatasets model instances)
     query: dict,
     token: str | None = None,
 ):
-    # Example nodes:
-    # [
-    #     {
-    #         "node_url": "https://node.neurobagel.org/",
-    #         "dataset_uuids": ["uuid1", "uuid2"]
-    #     },
-    #     {
-    #         "node_url": "https://node.neurobagel.org/",
-    #         "dataset_uuids": []
-    #     },
-    # ]
+    """
+    Makes POST requests to the /subjects route of one or more Neurobagel node APIs.
 
+    Parameters
+    ----------
+    query : dict
+        Dictionary of Neurobagel query parameters,
+        including a "nodes" list of dictionaries of node URLs and specific dataset UUIDs.
+    token : str, optional
+        ID token for authentication, by default None
+
+    Returns
+    -------
+    httpx.response
+        Response of the POST request.
+
+    """
     cross_node_results = []
     node_errors = []
 

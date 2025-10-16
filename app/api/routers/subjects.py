@@ -1,4 +1,4 @@
-"""Router for query path operations."""
+"""Router for /subjects path operations."""
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2
@@ -42,7 +42,7 @@ async def post_subjects_query(
         token = verify_token(token)
 
     response_dict = await crud.query_records(
-        query=query.dict(exclude_unset=True),
+        query=query.dict(exclude_none=True),
         token=token,
     )
 
