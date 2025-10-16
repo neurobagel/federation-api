@@ -245,12 +245,12 @@ def validate_queried_nodes(nodes: list[dict] | None) -> list[dict]:
             if node["node_url"] in cleaned_node_urls:
                 raise HTTPException(
                     status_code=422,
-                    detail=f"Duplicate node URL in request body: {node['node_url']}. "
+                    detail=f"Duplicate node URL found in request body: {node['node_url']}. "
                     "Ensure each node is only listed once.",
                 )
             cleaned_node_urls.append(node["node_url"])
 
-        # TODO: Revisit once we deprecate the GET /query endpoint.
+        # TODO: Revisit once we deprecate GET /query.
         # We currently check that all node URLs are recognized together (rather than one by one above)
         # to emit a single error message listing all unrecognized nodes,
         # and to avoid duplicating validation logic across the GET /query and POST /subjects endpoints.

@@ -6,7 +6,6 @@ import logging
 from fastapi import HTTPException
 
 from . import utility as util
-from .models import BaseQueryModel, SubjectsQueryModel
 
 
 # TODO: Consider removing in future -
@@ -153,7 +152,9 @@ async def get(
 
 
 async def query_records(
-    query: SubjectsQueryModel,
+    # We accept a dict instead of a SubjectsQueryModel to make it easier to inspect
+    # and modify the node list as a list of dictionaries (rather than NodeDatasets model instances)
+    query: dict,
     token: str | None = None,
 ):
     # Example nodes:
@@ -171,24 +172,19 @@ async def query_records(
     cross_node_results = []
     node_errors = []
 
-    nodes = util.validate_queried_nodes(query.nodes)
-    # TODO: Remove - for debugging
-    print(nodes)
+    nodes = util.validate_queried_nodes(query.get("nodes"))
     node_urls = [node["node_url"] for node in nodes]
 
-    # Remove node specification details from query for the n-API request
-    request_body = query.dict(include=BaseQueryModel.__fields__.keys())
+    query.pop("nodes", None)
 
     tasks = []
     # TODO: revisit when we deprecate the GET query endpoint
     # NOTE: Nodes in a single request can only be ALL strings or ALL dicts
     for node in nodes:
         node_request_url = node["node_url"] + "subjects"
-        request_body["datasets"] = node.get("dataset_uuids")
+        query["datasets"] = node.get("dataset_uuids")
         tasks.append(
-            util.send_post_request(
-                node_request_url, body=request_body, token=token
-            )
+            util.send_post_request(node_request_url, body=query, token=token)
         )
 
     responses = await asyncio.gather(*tasks, return_exceptions=True)
