@@ -22,10 +22,6 @@ oauth2_scheme = OAuth2(
 
 # We use the Response parameter below to change the status code of the response while still being able to validate the returned data using the response model.
 # (see https://fastapi.tiangolo.com/advanced/response-change-status-code/ for more info).
-#
-# TODO: if our response model for fully successful vs. not fully successful responses grows more complex in the future,
-# consider additionally using https://fastapi.tiangolo.com/advanced/additional-responses/#additional-response-with-model to document
-# example responses for different status codes in the OpenAPI docs (less relevant for now since there is only one response model).
 @router.post("", response_model=CombinedQueryResponse)
 async def post_subjects_query(
     response: Response,
