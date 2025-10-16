@@ -41,7 +41,7 @@ async def post_subjects_query(
             )
         token = verify_token(token)
 
-    response_dict = await crud.query_records(
+    response_dict = await crud.post_subjects(
         query=query.dict(exclude_none=True),
         token=token,
     )

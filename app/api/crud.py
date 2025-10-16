@@ -46,6 +46,26 @@ def build_combined_response(
     return content
 
 
+def gather_node_query_responses(node_urls: list, responses: list):
+    """Gather results and errors from a list of cohort query responses from multiple nodes."""
+    cross_node_results = []
+    node_errors = []
+    for node_url, response in zip(node_urls, responses):
+        node_name = util.FEDERATION_NODES[node_url]
+        if isinstance(response, HTTPException):
+            node_errors.append(
+                {"node_name": node_name, "error": response.detail}
+            )
+            logging.warning(
+                f"Request to node {node_name} ({node_url}) did not succeed: {response.detail}"
+            )
+        else:
+            for result in response:
+                result["node_name"] = node_name
+            cross_node_results.extend(response)
+    return cross_node_results, node_errors
+
+
 async def get(
     query: dict,
     token: str | None = None,
@@ -79,19 +99,9 @@ async def get(
     ]
     responses = await asyncio.gather(*tasks, return_exceptions=True)
 
-    for node_url, response in zip(node_urls, responses):
-        node_name = util.FEDERATION_NODES[node_url]
-        if isinstance(response, HTTPException):
-            node_errors.append(
-                {"node_name": node_name, "error": response.detail}
-            )
-            logging.warning(
-                f"Request to node {node_name} ({node_url}) did not succeed: {response.detail}"
-            )
-        else:
-            for result in response:
-                result["node_name"] = node_name
-            cross_node_results.extend(response)
+    cross_node_results, node_errors = gather_node_query_responses(
+        node_urls, responses
+    )
 
     return build_combined_response(
         total_nodes=len(node_urls),
@@ -100,7 +110,7 @@ async def get(
     )
 
 
-async def query_records(
+async def post_subjects(
     # We accept a dict instead of a Pydantic model to make it more flexible to inspect
     # and modify the node list as a list of dictionaries (rather than NodeDatasets model instances)
     query: dict,
@@ -123,9 +133,6 @@ async def query_records(
         Response of the POST request.
 
     """
-    cross_node_results = []
-    node_errors = []
-
     nodes = util.validate_queried_nodes(query.get("nodes"))
     node_urls = [node["node_url"] for node in nodes]
 
@@ -143,19 +150,9 @@ async def query_records(
 
     responses = await asyncio.gather(*tasks, return_exceptions=True)
 
-    for node_url, response in zip(node_urls, responses):
-        node_name = util.FEDERATION_NODES[node_url]
-        if isinstance(response, HTTPException):
-            node_errors.append(
-                {"node_name": node_name, "error": response.detail}
-            )
-            logging.warning(
-                f"Request to node {node_name} ({node_url}) did not succeed: {response.detail}"
-            )
-        else:
-            for result in response:
-                result["node_name"] = node_name
-            cross_node_results.extend(response)
+    cross_node_results, node_errors = gather_node_query_responses(
+        node_urls, responses
+    )
 
     return build_combined_response(
         total_nodes=len(nodes),
