@@ -212,6 +212,7 @@ def check_nodes_are_recognized(node_urls: list):
         )
 
 
+# TODO: Remove once we deprecate the GET /query endpoint
 def validate_query_node_url_list(node_urls: list) -> list:
     """
     Format and validate node URLs passed as values to the query endpoint,
@@ -228,6 +229,38 @@ def validate_query_node_url_list(node_urls: list) -> list:
         # default to searching over all known nodes
         node_urls = list(FEDERATION_NODES.keys())
     return node_urls
+
+
+def validate_queried_nodes(nodes: list[dict] | None) -> list[dict]:
+    """
+    Format and validate the node URLs in the list of nodes passed to POST /subjects endpoint,
+    including setting a default list of node URLs when none are provided.
+    """
+    if nodes:
+        nodes_to_query = []
+        cleaned_node_urls = []
+        for node in nodes:
+            node["node_url"] = add_trailing_slash(node["node_url"])
+            nodes_to_query.append(node)
+            if node["node_url"] in cleaned_node_urls:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Duplicate node URL in request body: {node['node_url']}. "
+                    "Ensure each node is only listed once.",
+                )
+            cleaned_node_urls.append(node["node_url"])
+
+        # TODO: Revisit once we deprecate the GET /query endpoint.
+        # We currently check that all node URLs are recognized together (rather than one by one above)
+        # to emit a single error message listing all unrecognized nodes,
+        # and to avoid duplicating validation logic across the GET /query and POST /subjects endpoints.
+        check_nodes_are_recognized(cleaned_node_urls)
+    else:
+        nodes_to_query = [
+            {"node_url": node_url} for node_url in FEDERATION_NODES
+        ]
+
+    return nodes_to_query
 
 
 async def send_get_request(
@@ -270,6 +303,84 @@ async def send_get_request(
             response = await client.get(
                 url=url,
                 params=params,
+                headers=headers,
+                timeout=timeout,
+                # Enable redirect following (off by default) so
+                # APIs behind a proxy can be reached
+                follow_redirects=True,
+            )
+            if not response.is_success:
+                raise HTTPException(
+                    status_code=response.status_code,
+                    detail=f"{response.reason_phrase}: {response.text}",
+                )
+            return response.json()
+        # Make sure that any HTTPException raised by us is not then caught by the most generic Exception block below
+        # (from https://stackoverflow.com/a/16123643)
+        except HTTPException:
+            raise
+        except httpx.NetworkError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=f"Request failed due to a network error or because the node API could not be reached: {exc}",
+            ) from exc
+        except httpx.TimeoutException as exc:
+            raise HTTPException(
+                status_code=status.HTTP_504_GATEWAY_TIMEOUT,
+                detail=f"Request failed due to a timeout: {exc}",
+            ) from exc
+        except httpx.RequestError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Request failed due to an error: {exc}",
+            ) from exc
+        except Exception as exc:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"An unexpected error was encountered: {exc}",
+            ) from exc
+
+
+async def send_post_request(
+    url: str,
+    body: dict | None = None,
+    token: str | None = None,
+    timeout: float | None = None,
+) -> dict:
+    """
+    Makes a GET request to one or more Neurobagel nodes.
+
+    Parameters
+    ----------
+    url : str
+        URL of Neurobagel node API.
+    body : dict, optional
+        Neurobagel query parameters as a request body, by default None.
+    token : str, optional
+        Authorization token for the request, by default None.
+    timeout : float, optional
+        Timeout for the request, by default None.
+
+    Returns
+    -------
+    dict
+        JSON response from Neurobagel node API.
+
+
+    Raises
+    ------
+    HTTPException
+        _description_
+    """
+    async with httpx.AsyncClient() as client:
+        headers = {
+            "Content-Type": "application/json",
+            **({"Authorization": f"Bearer {token}"} if token else {}),
+        }
+        try:
+            response = await client.post(
+                url=url,
+                json=body,
                 headers=headers,
                 timeout=timeout,
                 # Enable redirect following (off by default) so

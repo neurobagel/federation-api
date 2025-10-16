@@ -6,8 +6,13 @@ import logging
 from fastapi import HTTPException
 
 from . import utility as util
+from .models import BaseQueryModel, SubjectsQueryModel
 
 
+# TODO: Consider removing in future -
+# this utility function is currently used by several CRUD functions,
+# but could be removed if we switched to using for loops instead of list comprehensions
+# when building request tasks.
 def build_node_request_urls(node_urls: list, path: str) -> list:
     """
     Return a list of URLs for the current request for the specified set of Neurobagel nodes.
@@ -42,7 +47,7 @@ def build_combined_response(
     return content
 
 
-async def query_records(
+async def get(
     min_age: float,
     max_age: float,
     sex: str,
@@ -53,7 +58,7 @@ async def query_records(
     image_modal: str,
     pipeline_name: str,
     pipeline_version: str,
-    nodes: list,
+    node_urls: list[str],
     token: str | None = None,
 ) -> dict:
     """
@@ -61,8 +66,6 @@ async def query_records(
 
     Parameters
     ----------
-    token : str, optional
-        ID token for authentication, by default None
     min_age : float
         Minimum age of subject.
     max_age : float
@@ -83,8 +86,10 @@ async def query_records(
         Name of pipeline run on subject scans.
     pipeline_version : str
         Version of pipeline run on subject scans.
-    nodes : list
-        List of Neurobagel nodes (and optionally datasets) to restrict the query to.
+    node_urls : list
+        List of Neurobagel nodes to send the query to.
+    token : str, optional
+        ID token for authentication, by default None
 
     Returns
     -------
@@ -94,11 +99,6 @@ async def query_records(
     """
     cross_node_results = []
     node_errors = []
-
-    if isinstance(nodes[0], dict):
-        node_urls = [node["node_url"] for node in nodes]
-    else:
-        node_urls = nodes
 
     node_urls = util.validate_query_node_url_list(node_urls)
 
@@ -127,11 +127,73 @@ async def query_records(
 
     tasks = [
         util.send_get_request(node_request_url, params, token)
-        for node_request_url in build_node_request_urls(nodes, "query")
+        for node_request_url in build_node_request_urls(node_urls, "query")
     ]
     responses = await asyncio.gather(*tasks, return_exceptions=True)
 
-    for node_url, response in zip(nodes, responses):
+    for node_url, response in zip(node_urls, responses):
+        node_name = util.FEDERATION_NODES[node_url]
+        if isinstance(response, HTTPException):
+            node_errors.append(
+                {"node_name": node_name, "error": response.detail}
+            )
+            logging.warning(
+                f"Request to node {node_name} ({node_url}) did not succeed: {response.detail}"
+            )
+        else:
+            for result in response:
+                result["node_name"] = node_name
+            cross_node_results.extend(response)
+
+    return build_combined_response(
+        total_nodes=len(node_urls),
+        cross_node_results=cross_node_results,
+        node_errors=node_errors,
+    )
+
+
+async def query_records(
+    query: SubjectsQueryModel,
+    token: str | None = None,
+):
+    # Example nodes:
+    # [
+    #     {
+    #         "node_url": "https://node.neurobagel.org/",
+    #         "dataset_uuids": ["uuid1", "uuid2"]
+    #     },
+    #     {
+    #         "node_url": "https://node.neurobagel.org/",
+    #         "dataset_uuids": []
+    #     },
+    # ]
+
+    cross_node_results = []
+    node_errors = []
+
+    nodes = util.validate_queried_nodes(query.nodes)
+    # TODO: Remove - for debugging
+    print(nodes)
+    node_urls = [node["node_url"] for node in nodes]
+
+    # Remove node specification details from query for the n-API request
+    request_body = query.dict(include=BaseQueryModel.__fields__.keys())
+
+    tasks = []
+    # TODO: revisit when we deprecate the GET query endpoint
+    # NOTE: Nodes in a single request can only be ALL strings or ALL dicts
+    for node in nodes:
+        node_request_url = node["node_url"] + "subjects"
+        request_body["datasets"] = node.get("dataset_uuids")
+        tasks.append(
+            util.send_post_request(
+                node_request_url, body=request_body, token=token
+            )
+        )
+
+    responses = await asyncio.gather(*tasks, return_exceptions=True)
+
+    for node_url, response in zip(node_urls, responses):
         node_name = util.FEDERATION_NODES[node_url]
         if isinstance(response, HTTPException):
             node_errors.append(
