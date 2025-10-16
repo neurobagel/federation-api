@@ -12,21 +12,37 @@ CONTROLLED_TERM_REGEX = r"^[a-zA-Z]+[:]\S+$"
 class BaseQueryModel(BaseModel):
     """Data model for standardized variable-based query parameters."""
 
-    min_age: float = None
-    max_age: float = None
-    sex: str = None
-    diagnosis: str = None
-    min_num_imaging_sessions: int = None
-    min_num_phenotypic_sessions: int = None
-    assessment: str = None
-    image_modal: str = None
-    pipeline_name: str = None
-    pipeline_version: str = None
+    min_age: float = Field(default=None, description="Minimum age of subject.")
+    max_age: float = Field(default=None, description="Maximum age of subject.")
+    sex: str = Field(default=None, description="Sex of subject.")
+    diagnosis: str = Field(default=None, description="Subject diagnosis.")
+    min_num_imaging_sessions: int = Field(
+        default=None, description="Subject minimum number of imaging sessions."
+    )
+    min_num_phenotypic_sessions: int = Field(
+        default=None,
+        description="Subject minimum number of phenotypic sessions.",
+    )
+    assessment: str = Field(
+        default=None,
+        description="Non-imaging assessment completed by subjects.",
+    )
+    image_modal: str = Field(
+        default=None, description="Imaging modality of subject scans."
+    )
+    pipeline_name: str = Field(
+        default=None, description="Name of pipeline run on subject scans."
+    )
+    pipeline_version: str = Field(
+        default=None, description="Version of pipeline run on subject scans."
+    )
 
 
 class QueryModel(BaseQueryModel):
-    # TODO: Replace default value with union of local and public nodes once https://github.com/neurobagel/federation-api/issues/28 is merged
-    # syntax from https://github.com/tiangolo/fastapi/issues/4445#issuecomment-1117632409
+    # TODO: Revisit after addressing https://github.com/neurobagel/federation-api/issues/165
+    # After FastAPI v0.115.0+, we should no longer need this custom syntax to support a list query parameter in a GET request
+    # (and ensure the interactive docs work to specify a list)
+    # originally adapted from https://github.com/tiangolo/fastapi/issues/4445#issuecomment-1117632409
     node_url: list[str] | None = Field(Query(default=[]))
 
 
