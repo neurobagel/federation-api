@@ -139,8 +139,7 @@ async def post_subjects(
     query.pop("nodes", None)
 
     tasks = []
-    # TODO: revisit when we deprecate the GET query endpoint
-    # NOTE: Nodes in a single request can only be ALL strings or ALL dicts
+    # NOTE: Nodes in a single request can only be ALL dicts
     for node in nodes:
         node_request_url = node["node_url"] + "subjects"
         query["datasets"] = node.get("dataset_uuids")

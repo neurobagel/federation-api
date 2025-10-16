@@ -348,7 +348,7 @@ async def send_post_request(
     timeout: float | None = None,
 ) -> dict:
     """
-    Makes a GET request to one or more Neurobagel nodes.
+    Makes a POST request to one or more Neurobagel nodes.
 
     Parameters
     ----------
