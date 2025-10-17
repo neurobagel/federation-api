@@ -2,7 +2,6 @@
 
 import asyncio
 import logging
-from typing import Any
 
 from fastapi import HTTPException
 
@@ -41,23 +40,6 @@ def build_combined_response(
         content["nodes_response_status"] = "success"
 
     return content
-
-
-def is_valid_dict_response(
-    response: Any, find_key: str | None = None
-) -> tuple[bool, str]:
-    """
-    Check if a response from a node is a dict and has a specific key,
-    and return an informative error if not.
-    """
-    if isinstance(response, dict):
-        if find_key is None:
-            return True, ""
-        if response.get(find_key) is not None:
-            return True, ""
-    if isinstance(response, HTTPException):
-        return False, response.detail
-    return False, "Unexpected response format received from node"
 
 
 async def get(
@@ -197,7 +179,7 @@ async def get_instances(attribute_path: str):
     for (node_url, node_name), response in zip(
         util.FEDERATION_NODES.items(), responses
     ):
-        response_valid, node_error = is_valid_dict_response(
+        response_valid, node_error = util.is_valid_dict_response(
             response=response, find_key=attribute_uri
         )
         if response_valid:
@@ -250,7 +232,7 @@ async def get_pipeline_versions(pipeline_term: str):
     for (node_url, node_name), response in zip(
         util.FEDERATION_NODES.items(), responses
     ):
-        response_valid, node_error = is_valid_dict_response(
+        response_valid, node_error = util.is_valid_dict_response(
             response=response, find_key=pipeline_term
         )
         if response_valid:
