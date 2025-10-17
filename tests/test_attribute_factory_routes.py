@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 import httpx
 import pytest
 from fastapi import status
@@ -16,7 +18,7 @@ def test_get_instances_with_duplicate_terms_handled(
     async def mock_httpx_get(self, **kwargs):
         # The self parameter is necessary to match the signature of the method being mocked,
         # which is a class method of the httpx.AsyncClient class (see https://www.python-httpx.org/api/#asyncclient).
-        if "https://firstpublicnode.org/" in kwargs["url"]:
+        if urlparse(kwargs["url"]).hostname == "firstpublicnode.org":
             mocked_node_get_assessments_response = {
                 "nb:Assessment": [
                     {

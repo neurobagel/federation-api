@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 import httpx
 import pytest
 from fastapi import status
@@ -13,7 +15,7 @@ def test_unique_pipeline_versions_returned_from_nodes(
 
     # Predefine the responses from the mocked n-APIs set using the fixture set_valid_test_federation_nodes
     async def mock_httpx_get(self, **kwargs):
-        if "https://firstpublicnode.org/" in kwargs["url"]:
+        if urlparse(kwargs["url"]).hostname == "firstpublicnode.org":
             mocked_response_json = {"np:pipeline1": ["1.0.0", "1.0.1"]}
         else:
             mocked_response_json = {"np:pipeline1": ["1.0.1", "1.0.2"]}
@@ -46,7 +48,7 @@ def test_invalid_response_format_handled_gracefully(
 
     # Predefine the responses from the mocked n-APIs set using the fixture set_valid_test_federation_nodes
     async def mock_httpx_get(self, **kwargs):
-        if "https://firstpublicnode.org/" in kwargs["url"]:
+        if urlparse(kwargs["url"]).hostname == "firstpublicnode.org":
             mocked_response_json = {"np:pipeline1": ["1.0.0", "1.0.1"]}
         else:
             mocked_response_json = invalid_response
