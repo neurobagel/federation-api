@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+from typing import Any
 
 from fastapi import HTTPException
 
@@ -40,6 +41,23 @@ def build_combined_response(
         content["nodes_response_status"] = "success"
 
     return content
+
+
+def is_valid_dict_response(
+    response: Any, find_key: str | None = None
+) -> tuple[bool, str]:
+    """
+    Check if a response from a node is a dict and has a specific key,
+    and return an informative error if not.
+    """
+    if isinstance(response, dict):
+        if find_key is None:
+            return True, ""
+        if response.get(find_key) is not None:
+            return True, ""
+    if isinstance(response, HTTPException):
+        return False, response.detail
+    return False, "Unexpected response format received from node"
 
 
 async def get(
@@ -179,19 +197,20 @@ async def get_instances(attribute_path: str):
     for (node_url, node_name), response in zip(
         util.FEDERATION_NODES.items(), responses
     ):
-        if isinstance(response, HTTPException):
-            node_errors.append(
-                {"node_name": node_name, "error": response.detail}
-            )
-            logging.warning(
-                f"Request to node {node_name} ({node_url}) did not succeed: {response.detail}"
-            )
-        else:
+        response_valid, node_error = is_valid_dict_response(
+            response=response, find_key=attribute_uri
+        )
+        if response_valid:
             # NOTE: We return only the unique attribute instances from all nodes, based on the instance's *term URL*.
             # This means that if the same instance term appears in multiple nodes with potentially different human-readable labels,
             # only one version (term-label pairing) will be included in the response.
-            for term_dict in response[attribute_uri]:
+            for term_dict in response.get(attribute_uri):
                 unique_terms_dict[term_dict["TermURL"]] = term_dict
+        else:
+            node_errors.append({"node_name": node_name, "error": node_error})
+            logging.warning(
+                f"Request to node {node_name} ({node_url}) did not succeed: {node_error}"
+            )
 
     cross_node_results = {attribute_uri: list(unique_terms_dict.values())}
 
@@ -216,10 +235,10 @@ async def get_pipeline_versions(pipeline_term: str):
     dict
         Dictionary where the key is the pipeline term and the value is the list of unique available (i.e. used) versions of the pipeline.
     """
-    # TODO: The logic in this function is very similar to get_terms. Consider refactoring to reduce code duplication.
     node_errors = []
     all_pipe_versions = []
 
+    # TODO: Consider refactoring out coroutine list definition
     tasks = [
         util.send_get_request(node_request_url)
         for node_request_url in build_node_request_urls(
@@ -231,15 +250,16 @@ async def get_pipeline_versions(pipeline_term: str):
     for (node_url, node_name), response in zip(
         util.FEDERATION_NODES.items(), responses
     ):
-        if isinstance(response, HTTPException):
-            node_errors.append(
-                {"node_name": node_name, "error": response.detail}
-            )
-            logging.warning(
-                f"Request to node {node_name} ({node_url}) did not succeed: {response.detail}"
-            )
+        response_valid, node_error = is_valid_dict_response(
+            response=response, find_key=pipeline_term
+        )
+        if response_valid:
+            all_pipe_versions.extend(response.get(pipeline_term))
         else:
-            all_pipe_versions.extend(response[pipeline_term])
+            node_errors.append({"node_name": node_name, "error": node_error})
+            logging.warning(
+                f"Request to node {node_name} ({node_url}) did not succeed: {node_error}"
+            )
 
     cross_node_results = {pipeline_term: sorted(list(set(all_pipe_versions)))}
 
