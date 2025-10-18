@@ -1,3 +1,5 @@
+from urllib import parse
+
 import httpx
 import pytest
 from fastapi import status
@@ -16,7 +18,7 @@ def test_get_instances_with_duplicate_terms_handled(
     async def mock_httpx_request(self, method, url, **kwargs):
         # The self parameter is necessary to match the signature of the method being mocked,
         # which is a class method of the httpx.AsyncClient class (see https://www.python-httpx.org/api/#asyncclient).
-        if "https://firstpublicnode.org/" in url:
+        if parse.urlparse(url).hostname == "firstpublicnode.org":
             mocked_node_get_assessments_response = {
                 "nb:Assessment": [
                     {
@@ -86,7 +88,7 @@ def test_partially_failed_get_instances_handled_gracefully(
     }
 
     async def mock_httpx_request(self, method, url, **kwargs):
-        if "https://secondpublicnode.org/" in url:
+        if parse.urlparse(url).hostname == "secondpublicnode.org":
             return httpx.Response(
                 status_code=500, json={}, text="Some internal server error"
             )
