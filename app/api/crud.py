@@ -71,7 +71,7 @@ async def get(
     token: str | None = None,
 ) -> dict:
     """
-    Makes GET requests to one or more Neurobagel node APIs using send_get_request utility function where the parameters are Neurobagel query parameters.
+    Makes GET requests to one or more Neurobagel node APIs where the parameters are Neurobagel query parameters.
 
     Parameters
     ----------
@@ -94,7 +94,9 @@ async def get(
     query.pop("node_url", None)
 
     tasks = [
-        util.send_get_request(node_request_url, query, token)
+        util.send_request(
+            method="GET", url=node_request_url, params=query, token=token
+        )
         for node_request_url in build_node_request_urls(node_urls, "query")
     ]
     responses = await asyncio.gather(*tasks, return_exceptions=True)
@@ -144,7 +146,9 @@ async def post_subjects(
         node_request_url = node["node_url"] + "subjects"
         query["datasets"] = node.get("dataset_uuids")
         tasks.append(
-            util.send_post_request(node_request_url, body=query, token=token)
+            util.send_request(
+                method="POST", url=node_request_url, body=query, token=token
+            )
         )
 
     responses = await asyncio.gather(*tasks, return_exceptions=True)
@@ -182,7 +186,7 @@ async def get_instances(attribute_path: str):
     attribute_uri = util.RESOURCE_URI_MAP[attribute_path]
 
     tasks = [
-        util.send_get_request(url=node_request_url)
+        util.send_request(method="GET", url=node_request_url)
         for node_request_url in build_node_request_urls(
             util.FEDERATION_NODES, attribute_path
         )
@@ -234,7 +238,7 @@ async def get_pipeline_versions(pipeline_term: str):
     all_pipe_versions = []
 
     tasks = [
-        util.send_get_request(node_request_url)
+        util.send_request(method="GET", url=node_request_url)
         for node_request_url in build_node_request_urls(
             util.FEDERATION_NODES, f"pipelines/{pipeline_term}/versions"
         )
