@@ -112,7 +112,7 @@ async def get(
     )
 
 
-async def post_subjects(
+async def post(
     # We accept a dict instead of a Pydantic model to make it more flexible to inspect
     # and modify the node list as a list of dictionaries (rather than NodeDatasets model instances)
     query: dict,
