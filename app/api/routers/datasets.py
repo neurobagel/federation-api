@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2
 
 from .. import crud, security
-from ..models import CombinedDatasetsQueryResponse, PostQueryModel
+from ..models import CombinedDatasetsQueryResponse, DatasetsQueryModel
 from ..security import verify_token
 
 router = APIRouter(prefix="/datasets", tags=["datasets"])
@@ -23,7 +23,7 @@ oauth2_scheme = OAuth2(
 @router.post("", response_model=CombinedDatasetsQueryResponse)
 async def post_datasets_query(
     response: Response,
-    query: PostQueryModel,
+    query: DatasetsQueryModel,
     token: str | None = Depends(oauth2_scheme),
 ):
     """When a POST request is sent, return list of dicts corresponding to metadata for datasets matching the query."""
@@ -35,7 +35,7 @@ async def post_datasets_query(
             )
         token = verify_token(token)
 
-    response_dict = await crud.post(
+    response_dict = await crud.post_datasets(
         query=query.dict(exclude_none=True),
         token=token,
     )

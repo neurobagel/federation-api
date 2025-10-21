@@ -53,14 +53,20 @@ class NodeDatasets(BaseModel):
     dataset_uuids: list[str] | None = None
 
 
-class PostQueryModel(BaseQueryModel):
-    """Data model a for POST query"""
+class SubjectsQueryModel(BaseQueryModel):
+    """Data model a for POST /subjects query."""
 
     nodes: list[NodeDatasets] | None = None
 
 
-class SubjectsQueryResponse(BaseModel):
-    """Data model for subject-level results for one dataset matching a given query."""
+class DatasetsQueryModel(BaseQueryModel):
+    """Data model for a POST /datasets query."""
+
+    nodes: list[str] | None = None
+
+
+class DatasetsQueryResponse(BaseModel):
+    """Data model for dataset-level results for one dataset matching a given query."""
 
     node_name: str
     dataset_uuid: str
@@ -70,23 +76,14 @@ class SubjectsQueryResponse(BaseModel):
     dataset_total_subjects: int
     records_protected: bool
     num_matching_subjects: int
+    image_modals: list
+    available_pipelines: dict
+
+
+class SubjectsQueryResponse(DatasetsQueryResponse):
+    """Data model for subject-level results for one dataset matching a given query."""
+
     subject_data: Union[list[dict], str]
-    image_modals: list
-    available_pipelines: dict
-
-
-class DatasetQueryResponse(BaseModel):
-    """Data model for dataset-level results for one dataset matching a given query."""
-
-    node_name: str
-    dataset_uuid: str
-    dataset_name: str
-    dataset_portal_uri: Optional[str]
-    dataset_total_subjects: int
-    records_protected: bool
-    num_matching_subjects: int
-    image_modals: list
-    available_pipelines: dict
 
 
 class NodesResponseStatus(str, Enum):
@@ -104,20 +101,23 @@ class NodeError(BaseModel):
     error: str
 
 
-class CombinedSubjectsQueryResponse(BaseModel):
+class BaseCombinedQueryResponse(BaseModel):
+    """Base data model for combined query results across all queried nodes."""
+
+    errors: list[NodeError]
+    nodes_response_status: NodesResponseStatus
+
+
+class CombinedSubjectsQueryResponse(BaseCombinedQueryResponse):
     """Data model for the combined subjects query results of all matching datasets across all queried nodes."""
 
-    errors: list[NodeError]
     responses: list[SubjectsQueryResponse]
-    nodes_response_status: NodesResponseStatus
 
 
-class CombinedDatasetsQueryResponse(BaseModel):
+class CombinedDatasetsQueryResponse(BaseCombinedQueryResponse):
     """Data model for the combined dataset query results of all matching datasets across all queried nodes."""
 
-    errors: list[NodeError]
-    responses: list[DatasetQueryResponse]
-    nodes_response_status: NodesResponseStatus
+    responses: list[DatasetsQueryResponse]
 
 
 class CombinedAttributeResponse(BaseModel):

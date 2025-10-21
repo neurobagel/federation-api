@@ -11,16 +11,8 @@ ROUTE = "/datasets"
     "valid_nodes",
     [
         [
-            {
-                "node_url": "https://firstpublicnode.org/",
-                "dataset_uuids": [
-                    "http://neurobagel.org/vocab/12345",
-                    "http://neurobagel.org/vocab/67890",
-                ],
-            },
-            {
-                "node_url": "https://secondpublicnode.org/",
-            },
+            "https://firstpublicnode.org/",
+            "https://secondpublicnode.org/",
         ],
         [],
         None,
@@ -64,36 +56,14 @@ def test_valid_nodes_do_not_error(
     [
         (
             [
-                {
-                    "node_url": "https://firstpublicnode.org/",
-                    "dataset_uuids": [
-                        "http://neurobagel.org/vocab/12345",
-                        "http://neurobagel.org/vocab/67890",
-                    ],
-                },
-                {
-                    "node_url": "https://firstpublicnode.org/",
-                    "dataset_uuids": ["http://neurobagel.org/vocab/34567"],
-                },
+                "https://firstpublicnode.org/",
+                "https://firstpublicnode.org/",
             ],
             "Duplicate node URL found",
         ),
         (
-            [
-                {
-                    "node_url": "",
-                    "dataset_uuids": ["http://neurobagel.org/vocab/12345"],
-                },
-            ],
+            [""],
             "Unrecognized Neurobagel node URL(s)",
-        ),
-        (
-            [
-                {
-                    "dataset_uuids": ["http://neurobagel.org/vocab/12345"],
-                },
-            ],
-            "field required",
         ),
     ],
 )

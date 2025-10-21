@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2
 
 from .. import crud, security
-from ..models import CombinedSubjectsQueryResponse, PostQueryModel
+from ..models import CombinedSubjectsQueryResponse, SubjectsQueryModel
 from ..security import verify_token
 
 router = APIRouter(prefix="/subjects", tags=["subjects"])
@@ -25,7 +25,7 @@ oauth2_scheme = OAuth2(
 @router.post("", response_model=CombinedSubjectsQueryResponse)
 async def post_subjects_query(
     response: Response,
-    query: PostQueryModel,
+    query: SubjectsQueryModel,
     token: str | None = Depends(oauth2_scheme),
 ):
     """When a POST request is sent, return list of dicts corresponding to subject-level metadata aggregated by dataset."""
@@ -37,7 +37,7 @@ async def post_subjects_query(
             )
         token = verify_token(token)
 
-    response_dict = await crud.post(
+    response_dict = await crud.post_subjects(
         query=query.dict(exclude_none=True),
         token=token,
     )

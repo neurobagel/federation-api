@@ -112,7 +112,7 @@ async def get(
     )
 
 
-async def post(
+async def post_subjects(
     # We accept a dict instead of a Pydantic model to make it more flexible to inspect
     # and modify the node list as a list of dictionaries (rather than NodeDatasets model instances)
     query: dict,
@@ -135,7 +135,7 @@ async def post(
         Response of the POST request.
 
     """
-    nodes = util.validate_queried_nodes(query.get("nodes"))
+    nodes = util.validate_queried_nodes(query.get("nodes"), True)
     node_urls = [node["node_url"] for node in nodes]
 
     query.pop("nodes", None)
@@ -159,6 +159,56 @@ async def post(
 
     return build_combined_response(
         total_nodes=len(nodes),
+        cross_node_results=cross_node_results,
+        node_errors=node_errors,
+    )
+
+
+async def post_datasets(
+    query: dict,
+    token: str | None = None,
+):
+    """
+    Makes POST requests to the /datasets route of one or more Neurobagel node APIs.
+
+    Parameters
+    ----------
+    query : dict
+        Dictionary of Neurobagel query parameters,
+        including a "nodes" list of node URLs.
+    token : str, optional
+        ID token for authentication, by default None
+
+    Returns
+    -------
+    httpx.response
+        Response of the POST request.
+
+    """
+    node_urls = util.validate_queried_nodes(
+        query.get("nodes"), nodes_as_dicts=False
+    )
+
+    query.pop("nodes", None)
+
+    tasks = [
+        util.send_request(
+            method="POST",
+            url=node_request_url,
+            body=query,
+            token=token,
+        )
+        for node_request_url in build_node_request_urls(node_urls, "datasets")
+    ]
+
+    responses = await asyncio.gather(*tasks, return_exceptions=True)
+
+    cross_node_results, node_errors = gather_node_query_responses(
+        node_urls, responses
+    )
+
+    return build_combined_response(
+        total_nodes=len(node_urls),
         cross_node_results=cross_node_results,
         node_errors=node_errors,
     )
