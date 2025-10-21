@@ -144,7 +144,7 @@ async def post(
     # NOTE: Nodes in a single request can only be ALL dicts
     for node in nodes:
         node_request_url = node["node_url"] + "subjects"
-        query["datasets"] = node.get("dataset_uuids")
+        query["dataset_uuids"] = node.get("dataset_uuids")
         tasks.append(
             util.send_request(
                 method="POST", url=node_request_url, body=query, token=token
