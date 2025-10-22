@@ -233,69 +233,44 @@ def validate_query_node_url_list(node_urls: list) -> list:
 
 
 def validate_queried_nodes(
-    nodes: list[dict] | list[str] | None,
-    nodes_as_dicts: bool = True,
-) -> list[dict] | list[str]:
+    nodes: list[dict] | None,
+) -> list[dict]:
     """
     Format and validate the node URLs in the list of nodes passed to POST endpoints,
     including setting a default list of node URLs when none are provided.
 
     Parameters
     ----------
-    nodes : list[dict] | list[str] | None
-        List of nodes to validate. Dicts with node_url keys (and optionally dataset_uuids)
-        for /subjects, or plain strings for /datasets.
-    nodes_as_dicts : bool
-        If True, expects and returns list of dicts (for /subjects endpoint).
-        If False, expects and returns list of strings (for /datasets endpoint).
+    nodes : list[dict] | None
+        List of nodes to validate. Dicts with node_url keys (and optionally dataset_uuids).
 
     Returns
     -------
-    list[dict] | list[str]
-        Validated nodes in the requested format.
+    list[dict]
+        Validated nodes as list of dicts.
     """
     if nodes:
+        nodes_to_query = []
         cleaned_node_urls = []
+        for node in nodes:
+            node["node_url"] = add_trailing_slash(node["node_url"])
+            nodes_to_query.append(node)
+            if node["node_url"] in cleaned_node_urls:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Duplicate node URL found in request body: {node['node_url']}. "
+                    "Ensure each node is only listed once.",
+                )
+            cleaned_node_urls.append(node["node_url"])
 
-        if nodes_as_dicts:
-            # Handle list of dicts (for /subjects)
-            nodes_to_query = []
-            for node in nodes:
-                node["node_url"] = add_trailing_slash(node["node_url"])
-                nodes_to_query.append(node)
-                if node["node_url"] in cleaned_node_urls:
-                    raise HTTPException(
-                        status_code=422,
-                        detail=f"Duplicate node URL found in request body: {node['node_url']}. "
-                        "Ensure each node is only listed once.",
-                    )
-                cleaned_node_urls.append(node["node_url"])
-
-            # TODO: Revisit once we deprecate GET /query.
-            # We currently check that all node URLs are recognized together (rather than one by one above)
-            # to emit a single error message listing all unrecognized nodes,
-            # and to avoid duplicating validation logic across the GET /query and POST /subjects endpoints.
-            check_nodes_are_recognized(cleaned_node_urls)
-            return nodes_to_query
-        else:
-            # Handle list of strings (for /datasets)
-            for node_url in nodes:
-                node_url = add_trailing_slash(node_url)
-                if node_url in cleaned_node_urls:
-                    raise HTTPException(
-                        status_code=422,
-                        detail=f"Duplicate node URL found in request body: {node_url}. "
-                        "Ensure each node is only listed once.",
-                    )
-                cleaned_node_urls.append(node_url)
-
-            check_nodes_are_recognized(cleaned_node_urls)
-            return cleaned_node_urls
+        # TODO: Revisit once we deprecate GET /query.
+        # We currently check that all node URLs are recognized together (rather than one by one above)
+        # to emit a single error message listing all unrecognized nodes,
+        # and to avoid duplicating validation logic across the GET /query and POST /subjects endpoints.
+        check_nodes_are_recognized(cleaned_node_urls)
+        return nodes_to_query
     else:
-        if nodes_as_dicts:
-            return [{"node_url": node_url} for node_url in FEDERATION_NODES]
-        else:
-            return list(FEDERATION_NODES.keys())
+        return [{"node_url": node_url} for node_url in FEDERATION_NODES]
 
 
 async def send_request(

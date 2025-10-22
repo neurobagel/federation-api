@@ -59,10 +59,16 @@ class SubjectsQueryModel(BaseQueryModel):
     nodes: list[NodeDatasets] | None = None
 
 
+class NodeUrl(BaseModel):
+    """Data model for specifying a single node URL."""
+
+    node_url: str
+
+
 class DatasetsQueryModel(BaseQueryModel):
     """Data model for a POST /datasets query."""
 
-    nodes: list[str] | None = None
+    nodes: list[NodeUrl] | None = None
 
 
 class DatasetsQueryResponse(BaseModel):

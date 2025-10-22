@@ -135,7 +135,7 @@ async def post_subjects(
         Response of the POST request.
 
     """
-    nodes = util.validate_queried_nodes(query.get("nodes"), True)
+    nodes = util.validate_queried_nodes(query.get("nodes"))
     node_urls = [node["node_url"] for node in nodes]
 
     query.pop("nodes", None)
@@ -175,7 +175,7 @@ async def post_datasets(
     ----------
     query : dict
         Dictionary of Neurobagel query parameters,
-        including a "nodes" list of node URLs.
+        including a "nodes" list of dictionaries of node URLs.
     token : str, optional
         ID token for authentication, by default None
 
@@ -185,9 +185,8 @@ async def post_datasets(
         Response of the POST request.
 
     """
-    node_urls = util.validate_queried_nodes(
-        query.get("nodes"), nodes_as_dicts=False
-    )
+    nodes = util.validate_queried_nodes(query.get("nodes"))
+    node_urls = [node["node_url"] for node in nodes]
 
     query.pop("nodes", None)
 

@@ -159,7 +159,7 @@ def test_validate_query_node_url_list(
 
 
 @pytest.mark.parametrize(
-    "raw_nodes, nodes_as_dicts, expected_nodes",
+    "raw_nodes, expected_nodes",
     [
         (
             [
@@ -178,7 +178,6 @@ def test_validate_query_node_url_list(
                     ],
                 },
             ],
-            True,
             [
                 {
                     "node_url": "https://firstknownnode.org/node/",
@@ -198,7 +197,6 @@ def test_validate_query_node_url_list(
         ),
         (
             [],
-            True,
             [
                 {
                     "node_url": "https://firstknownnode.org/node/",
@@ -210,7 +208,6 @@ def test_validate_query_node_url_list(
         ),
         (
             None,
-            True,
             [
                 {
                     "node_url": "https://firstknownnode.org/node/",
@@ -218,44 +215,14 @@ def test_validate_query_node_url_list(
                 {
                     "node_url": "https://secondknownnode.org/node/",
                 },
-            ],
-        ),
-        (
-            [
-                "https://firstknownnode.org/node",
-                "https://secondknownnode.org/node",
-            ],
-            False,
-            [
-                "https://firstknownnode.org/node/",
-                "https://secondknownnode.org/node/",
-            ],
-        ),
-        (
-            [],
-            False,
-            [
-                "https://firstknownnode.org/node/",
-                "https://secondknownnode.org/node/",
-            ],
-        ),
-        (
-            None,
-            False,
-            [
-                "https://firstknownnode.org/node/",
-                "https://secondknownnode.org/node/",
             ],
         ),
     ],
 )
-def test_validate_queried_nodes(
-    monkeypatch, raw_nodes, nodes_as_dicts, expected_nodes
-):
+def test_validate_queried_nodes(monkeypatch, raw_nodes, expected_nodes):
     """
     Test that a trailing slash is added to node URLs, dataset UUIDs are preserved (when provided),
     and the default list of all known federation nodes is used if none are specified.
-    Tests both dict format (for /subjects) and string format (for /datasets).
     """
     monkeypatch.setattr(
         util,
@@ -266,10 +233,7 @@ def test_validate_queried_nodes(
         },
     )
 
-    assert (
-        util.validate_queried_nodes(raw_nodes, nodes_as_dicts)
-        == expected_nodes
-    )
+    assert util.validate_queried_nodes(raw_nodes) == expected_nodes
 
 
 @pytest.mark.parametrize(

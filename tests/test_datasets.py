@@ -11,8 +11,8 @@ ROUTE = "/datasets"
     "valid_nodes",
     [
         [
-            "https://firstpublicnode.org/",
-            "https://secondpublicnode.org/",
+            {"node_url": "https://firstpublicnode.org/"},
+            {"node_url": "https://secondpublicnode.org/"},
         ],
         [],
         None,
@@ -56,13 +56,13 @@ def test_valid_nodes_do_not_error(
     [
         (
             [
-                "https://firstpublicnode.org/",
-                "https://firstpublicnode.org/",
+                {"node_url": "https://firstpublicnode.org/"},
+                {"node_url": "https://firstpublicnode.org/"},
             ],
             "Duplicate node URL found",
         ),
         (
-            [""],
+            [{"node_url": ""}],
             "Unrecognized Neurobagel node URL(s)",
         ),
     ],
