@@ -1,13 +1,13 @@
-"""Router for /subjects path operations."""
+"""Router for /datasets path operations."""
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2
 
 from .. import crud, security
-from ..models import CombinedSubjectsQueryResponse, SubjectsQueryModel
+from ..models import CombinedDatasetsQueryResponse, DatasetsQueryModel
 from ..security import verify_token
 
-router = APIRouter(prefix="/subjects", tags=["subjects"])
+router = APIRouter(prefix="/datasets", tags=["datasets"])
 
 oauth2_scheme = OAuth2(
     flows={
@@ -20,15 +20,13 @@ oauth2_scheme = OAuth2(
 )
 
 
-# We use the Response parameter below to change the status code of the response while still being able to validate the returned data using the response model.
-# (see https://fastapi.tiangolo.com/advanced/response-change-status-code/ for more info).
-@router.post("", response_model=CombinedSubjectsQueryResponse)
-async def post_subjects_query(
+@router.post("", response_model=CombinedDatasetsQueryResponse)
+async def post_datasets_query(
     response: Response,
-    query: SubjectsQueryModel,
+    query: DatasetsQueryModel,
     token: str | None = Depends(oauth2_scheme),
 ):
-    """When a POST request is sent, return list of dicts corresponding to subject-level metadata aggregated by dataset."""
+    """When a POST request is sent, return list of dicts corresponding to metadata for datasets matching the query."""
     if security.AUTH_ENABLED:
         if token is None:
             raise HTTPException(
@@ -37,7 +35,7 @@ async def post_subjects_query(
             )
         token = verify_token(token)
 
-    response_dict = await crud.post_subjects(
+    response_dict = await crud.post_datasets(
         query=query.dict(exclude_none=True),
         token=token,
     )
