@@ -65,17 +65,27 @@ def test_valid_nodes_do_not_error(
             [{"node_url": ""}],
             "Unrecognized Neurobagel node URL(s)",
         ),
+        # TODO this test case currently doesn't pass as our implementation doesn't
+        # forbid extra body parameters yet. It should be good once
+        # https://github.com/neurobagel/federation-api/issues/165 is implemented
+        # (
+        #     [
+        #         {
+        #             "node_url": "https://firstpublicnode.org/",
+        #             "dataset_uuids": ["http://neurobagel.org/vocab/12345"],
+        #         }
+        #     ],
+        #     "Unrecognized Neurobagel node URL(s)",
+        # ),
     ],
 )
 def test_invalid_nodes_raise_error(
     test_app,
     disable_auth,
     set_valid_test_federation_nodes,
-    mocked_single_matching_dataset_result,
     invalid_nodes,
     expected_error,
     monkeypatch,
-    caplog,
 ):
     """Test that when an invalid 'nodes' list is provided, POST /datasets raises a 422 error with an appropriate message."""
     response = test_app.post(ROUTE, json={"nodes": invalid_nodes})
