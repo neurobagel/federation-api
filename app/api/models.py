@@ -4,6 +4,8 @@ from enum import Enum
 
 from pydantic import BaseModel, Field
 
+CONTROLLED_TERM_REGEX = r"^[a-zA-Z]+[:]\S+$"
+
 
 class BaseQueryModel(BaseModel):
     """Data model for standardized variable-based query parameters."""
