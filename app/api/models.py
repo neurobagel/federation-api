@@ -5,9 +5,6 @@ from typing import Optional, Union
 
 from pydantic import BaseModel, Field
 
-# TODO: Remove - not used in models
-CONTROLLED_TERM_REGEX = r"^[a-zA-Z]+[:]\S+$"
-
 
 class BaseQueryModel(BaseModel):
     """Data model for standardized variable-based query parameters."""
