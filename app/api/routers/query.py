@@ -71,7 +71,7 @@ async def get_query(
         # Remove fields set to None (default value) from the dict
         # to avoid type validation errors of specific query parameters on the receiving nodes
         # (e.g., the value an n-API receives for min_age must be a float and cannot be null/None)
-        query=query.dict(exclude_none=True),
+        query=query.model_dump(exclude_none=True),
         token=token,
     )
 

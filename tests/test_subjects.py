@@ -91,7 +91,7 @@ def test_valid_nodes_do_not_error(
                     "dataset_uuids": ["http://neurobagel.org/vocab/12345"],
                 },
             ],
-            "field required",
+            "Field required",
         ),
     ],
 )
@@ -108,5 +108,5 @@ def test_invalid_nodes_raise_error(
     """Test that when an invalid 'nodes' list is provided, POST /subjects raises a 422 error with an appropriate message."""
     response = test_app.post(ROUTE, json={"nodes": invalid_nodes})
 
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert expected_error in response.text
