@@ -1,7 +1,6 @@
 """Data models."""
 
 from enum import Enum
-from typing import Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -73,7 +72,7 @@ class DatasetsQueryResponse(BaseModel):
     dataset_uuid: str
     # dataset_file_path: str  # TODO: Revisit this field once we have datasets without imaging info/sessions.
     dataset_name: str
-    dataset_portal_uri: Optional[str] = None
+    dataset_portal_uri: str | None
     dataset_total_subjects: int
     records_protected: bool
     num_matching_subjects: int
@@ -84,7 +83,7 @@ class DatasetsQueryResponse(BaseModel):
 class SubjectsQueryResponse(DatasetsQueryResponse):
     """Data model for subject-level results for one dataset matching a given query."""
 
-    subject_data: Union[list[dict], str]
+    subject_data: list[dict] | str
 
 
 class NodesResponseStatus(str, Enum):
