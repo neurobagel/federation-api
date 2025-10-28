@@ -65,18 +65,17 @@ def test_valid_nodes_do_not_error(
             [{"node_url": ""}],
             "Unrecognized Neurobagel node URL(s)",
         ),
-        # TODO this test case currently doesn't pass as our implementation doesn't
-        # forbid extra body parameters yet. It should be good once
-        # https://github.com/neurobagel/federation-api/issues/165 is implemented
-        # (
-        #     [
-        #         {
-        #             "node_url": "https://firstpublicnode.org/",
-        #             "dataset_uuids": ["http://neurobagel.org/vocab/12345"],
-        #         }
-        #     ],
-        #     "Unrecognized Neurobagel node URL(s)",
-        # ),
+        (
+            [
+                {
+                    "node_url": "https://firstpublicnode.org/",
+                    "dataset_uuids": [
+                        "http://neurobagel.org/vocab/12345"
+                    ],  # Unexpected field
+                }
+            ],
+            "Extra inputs",
+        ),
     ],
 )
 def test_invalid_nodes_raise_error(
