@@ -2,7 +2,7 @@
 
 from enum import Enum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 CONTROLLED_TERM_REGEX = r"^[a-zA-Z]+[:]\S+$"
 
@@ -35,6 +35,8 @@ class BaseQueryModel(BaseModel):
         default=None, description="Version of pipeline run on subject scans."
     )
 
+    model_config = ConfigDict(extra="forbid")
+
 
 class QueryModel(BaseQueryModel):
     node_url: list[str] = Field(
@@ -48,6 +50,8 @@ class NodeDatasets(BaseModel):
     node_url: str
     dataset_uuids: list[str] | None = None
 
+    model_config = ConfigDict(extra="forbid")
+
 
 class SubjectsQueryModel(BaseQueryModel):
     """Data model a for POST /subjects query."""
@@ -59,6 +63,8 @@ class NodeUrl(BaseModel):
     """Data model for specifying a single node URL."""
 
     node_url: str
+
+    model_config = ConfigDict(extra="forbid")
 
 
 class DatasetsQueryModel(BaseQueryModel):
