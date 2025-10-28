@@ -1,5 +1,4 @@
-from fastapi import APIRouter, Response, status
-from pydantic import StringConstraints
+from fastapi import APIRouter, Path, Response, status
 from typing_extensions import Annotated
 
 from .. import crud
@@ -22,9 +21,7 @@ router.add_api_route(
     "/{pipeline_term}/versions", response_model=CombinedAttributeResponse
 )
 async def get_pipeline_versions(
-    pipeline_term: Annotated[
-        str, StringConstraints(pattern=CONTROLLED_TERM_REGEX)
-    ],
+    pipeline_term: Annotated[str, Path(pattern=CONTROLLED_TERM_REGEX)],
     response: Response,
 ):
     """

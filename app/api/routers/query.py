@@ -1,6 +1,8 @@
 """Router for query path operations."""
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from fastapi.security import OAuth2
 
 from .. import crud, security
@@ -39,7 +41,7 @@ oauth2_scheme = OAuth2(
 @router.get("", response_model=CombinedSubjectsQueryResponse)
 async def get_query(
     response: Response,
-    query: QueryModel = Depends(QueryModel),
+    query: Annotated[QueryModel, Query()],
     token: str | None = Depends(oauth2_scheme),
 ):
     """When a GET request is sent, return list of dicts corresponding to subject-level metadata aggregated by dataset."""

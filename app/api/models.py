@@ -3,7 +3,6 @@
 from enum import Enum
 from typing import Optional, Union
 
-from fastapi import Query
 from pydantic import BaseModel, Field
 
 # TODO: Remove - not used in models
@@ -40,11 +39,9 @@ class BaseQueryModel(BaseModel):
 
 
 class QueryModel(BaseQueryModel):
-    # TODO: Revisit after addressing https://github.com/neurobagel/federation-api/issues/165
-    # After FastAPI v0.115.0+, we should no longer need this custom syntax to support a list query parameter in a GET request
-    # (and ensure the interactive docs work to specify a list)
-    # originally adapted from https://github.com/tiangolo/fastapi/issues/4445#issuecomment-1117632409
-    node_url: list[str] | None = Field(Query(default=[]))
+    node_url: list[str] = Field(
+        default=[], description="Specific nodes to query."
+    )
 
 
 class NodeDatasets(BaseModel):
