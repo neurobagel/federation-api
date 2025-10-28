@@ -6,6 +6,7 @@ from typing import Optional, Union
 from fastapi import Query
 from pydantic import BaseModel, Field
 
+# TODO: Remove - not used in models
 CONTROLLED_TERM_REGEX = r"^[a-zA-Z]+[:]\S+$"
 
 
@@ -78,7 +79,7 @@ class DatasetsQueryResponse(BaseModel):
     dataset_uuid: str
     # dataset_file_path: str  # TODO: Revisit this field once we have datasets without imaging info/sessions.
     dataset_name: str
-    dataset_portal_uri: Optional[str]
+    dataset_portal_uri: Optional[str] = None
     dataset_total_subjects: int
     records_protected: bool
     num_matching_subjects: int
