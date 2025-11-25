@@ -4,6 +4,8 @@ import httpx
 import pytest
 from fastapi import status
 
+from app.api import utility as util
+
 ROUTE = "/subjects"
 
 
@@ -131,3 +133,58 @@ def test_extra_query_fields_raise_error(
     assert all(
         msg in response.text for msg in ["invalid_extra_field", "Extra inputs"]
     )
+
+
+def test_node_requests_contain_intended_dataset_uuids(
+    test_app,
+    disable_auth,
+    set_valid_test_federation_nodes,
+    mocked_single_matching_dataset_result,
+    monkeypatch,
+):
+    captured_requests = []
+
+    async def mock_send_request(method, url, **kwargs):
+        captured_requests.append({"url": url, "body": kwargs["body"]})
+        # Return valid dummy response since we only care about the outgoing request content here
+        return [mocked_single_matching_dataset_result]
+
+    federated_query = {
+        "nodes": [
+            {
+                "node_url": "https://firstpublicnode.org/",
+                "dataset_uuids": [
+                    "http://neurobagel.org/vocab/ds-001",
+                    "http://neurobagel.org/vocab/ds-002",
+                ],
+            },
+            {
+                "node_url": "https://secondpublicnode.org/",
+                "dataset_uuids": [
+                    "http://neurobagel.org/vocab/ds-003",
+                ],
+            },
+        ]
+    }
+
+    monkeypatch.setattr(util, "send_request", mock_send_request)
+
+    test_app.post(
+        ROUTE,
+        json=federated_query,
+    )
+
+    assert len(captured_requests) == 2
+    assert (
+        captured_requests[0]["url"] == "https://firstpublicnode.org/subjects"
+    )
+    assert captured_requests[0]["body"]["dataset_uuids"] == [
+        "http://neurobagel.org/vocab/ds-001",
+        "http://neurobagel.org/vocab/ds-002",
+    ]
+    assert (
+        captured_requests[1]["url"] == "https://secondpublicnode.org/subjects"
+    )
+    assert captured_requests[1]["body"]["dataset_uuids"] == [
+        "http://neurobagel.org/vocab/ds-003",
+    ]
