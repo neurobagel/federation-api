@@ -142,6 +142,8 @@ def test_node_requests_contain_intended_dataset_uuids(
     mocked_single_matching_dataset_result,
     monkeypatch,
 ):
+    """Test that the outgoing request to each node correctly includes the dataset_uuids specified for that node."""
+
     captured_requests = []
 
     async def mock_send_request(method, url, **kwargs):
