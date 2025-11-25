@@ -242,15 +242,16 @@ def validate_queried_nodes(
     Parameters
     ----------
     nodes : list[dict] | None
-        List of nodes to validate. Dicts with node_url keys (and optionally dataset_uuids).
+        List of nodes to validate, where each node contains a dict with a "node_url" key and optionally a "dataset_uuids" key.
 
     Returns
     -------
     list[dict]
-        Validated nodes as list of dicts.
+        List of validated nodes with standardized formatting for "node_url" values.
     """
     if nodes:
         nodes_to_query = []
+        # Keep track of just the cleaned URLs to identify duplicates and check they are recognized
         cleaned_node_urls = []
         for node in nodes:
             node["node_url"] = add_trailing_slash(node["node_url"])
@@ -269,8 +270,8 @@ def validate_queried_nodes(
         # and to avoid duplicating validation logic across the GET /query and POST /subjects endpoints.
         check_nodes_are_recognized(cleaned_node_urls)
         return nodes_to_query
-    else:
-        return [{"node_url": node_url} for node_url in FEDERATION_NODES]
+
+    return [{"node_url": node_url} for node_url in FEDERATION_NODES]
 
 
 async def send_request(
@@ -308,6 +309,7 @@ async def send_request(
     HTTPException
         _description_
     """
+    print(url, body)
     async with httpx.AsyncClient() as client:
         headers = {
             "Content-Type": "application/json",
