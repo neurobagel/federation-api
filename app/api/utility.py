@@ -309,7 +309,6 @@ async def send_request(
     HTTPException
         _description_
     """
-    print(url, body)
     async with httpx.AsyncClient() as client:
         headers = {
             "Content-Type": "application/json",

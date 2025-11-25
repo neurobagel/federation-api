@@ -135,20 +135,20 @@ async def post_subjects(
         Response of the POST request.
 
     """
-    node_dataset_filters = util.validate_queried_nodes(query.get("nodes"))
-    node_urls = [node["node_url"] for node in node_dataset_filters]
+    node_datasets_filters = util.validate_queried_nodes(query.get("nodes"))
+    node_urls = [node["node_url"] for node in node_datasets_filters]
 
     query.pop("nodes", None)
 
     tasks = []
     # NOTE: Nodes in a single request can only be ALL dicts
-    for node_dataset_filter in node_dataset_filters:
-        node_request_url = node_dataset_filter["node_url"] + "subjects"
+    for node_datasets_filter in node_datasets_filters:
+        node_request_url = node_datasets_filter["node_url"] + "subjects"
         # Ensure each task gets its own copy of the base query.
         # Otherwise, mutating the original dict would cause all tasks to share the same final dataset_uuids value
         # since 'query' is passed by reference.
         node_query = query.copy()
-        node_query["dataset_uuids"] = node_dataset_filter.get("dataset_uuids")
+        node_query["dataset_uuids"] = node_datasets_filter.get("dataset_uuids")
         tasks.append(
             util.send_request(
                 method="POST",
@@ -158,14 +158,13 @@ async def post_subjects(
             )
         )
     responses = await asyncio.gather(*tasks, return_exceptions=True)
-    print(responses)
 
     cross_node_results, node_errors = gather_node_query_responses(
         node_urls, responses
     )
 
     return build_combined_response(
-        total_nodes=len(node_dataset_filters),
+        total_nodes=len(node_datasets_filters),
         cross_node_results=cross_node_results,
         node_errors=node_errors,
     )
