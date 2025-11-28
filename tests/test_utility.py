@@ -387,3 +387,113 @@ def test_is_valid_dict_response(
     assert util.is_valid_dict_response(
         response=node_response, find_key="nb:Assessment"
     ) == (expected_is_valid_result, expected_error)
+
+
+@pytest.mark.parametrize(
+    "path,nodes_filter,query_to_federate,expected_node_requests",
+    [
+        (
+            "datasets",
+            [
+                {"node_url": "https://firstnode.org/node/"},
+                {"node_url": "https://secondnode.org/node/"},
+            ],
+            {
+                "min_age": 16,
+                "max_age": 25,
+            },
+            {
+                "https://firstnode.org/node/datasets": {
+                    "min_age": 16,
+                    "max_age": 25,
+                },
+                "https://secondnode.org/node/datasets": {
+                    "min_age": 16,
+                    "max_age": 25,
+                },
+            },
+        ),
+        (
+            "subjects",
+            [
+                {
+                    "node_url": "https://firstnode.org/node/",
+                    "dataset_uuids": [
+                        "http://neurobagel.org/vocab/ds-001",
+                        "http://neurobagel.org/vocab/ds-002",
+                    ],
+                },
+                {
+                    "node_url": "https://secondnode.org/node/",
+                    "dataset_uuids": [
+                        "http://neurobagel.org/vocab/ds-003",
+                    ],
+                },
+            ],
+            {
+                "min_age": 16,
+                "max_age": 25,
+            },
+            {
+                "https://firstnode.org/node/subjects": {
+                    "min_age": 16,
+                    "max_age": 25,
+                    "dataset_uuids": [
+                        "http://neurobagel.org/vocab/ds-001",
+                        "http://neurobagel.org/vocab/ds-002",
+                    ],
+                },
+                "https://secondnode.org/node/subjects": {
+                    "min_age": 16,
+                    "max_age": 25,
+                    "dataset_uuids": [
+                        "http://neurobagel.org/vocab/ds-003",
+                    ],
+                },
+            },
+        ),
+        (
+            "subjects",
+            [
+                {
+                    "node_url": "https://firstnode.org/node/",
+                    "dataset_uuids": [
+                        "http://neurobagel.org/vocab/ds-001",
+                        "http://neurobagel.org/vocab/ds-002",
+                    ],
+                },
+                {
+                    "node_url": "https://secondnode.org/node/",
+                    "dataset_uuids": [
+                        "http://neurobagel.org/vocab/ds-003",
+                    ],
+                },
+            ],
+            {},
+            {
+                "https://firstnode.org/node/subjects": {
+                    "dataset_uuids": [
+                        "http://neurobagel.org/vocab/ds-001",
+                        "http://neurobagel.org/vocab/ds-002",
+                    ],
+                },
+                "https://secondnode.org/node/subjects": {
+                    "dataset_uuids": [
+                        "http://neurobagel.org/vocab/ds-003",
+                    ],
+                },
+            },
+        ),
+    ],
+)
+def test_build_node_requests_for_query(
+    path, nodes_filter, query_to_federate, expected_node_requests
+):
+    assert (
+        util.build_node_requests_for_query(
+            path=path,
+            nodes_filter=nodes_filter,
+            query_to_federate=query_to_federate,
+        )
+        == expected_node_requests
+    )
