@@ -5,6 +5,7 @@ import logging
 import os
 import warnings
 from collections import namedtuple
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -376,8 +377,8 @@ def is_valid_dict_response(
 
 
 def build_node_requests_for_query(
-    path: str, nodes_filter: dict, query_to_federate: dict
-) -> dict:
+    path: str, nodes_filter: list[dict], query_to_federate: dict
+) -> dict[str, dict]:
     """
     Return a dictionary mapping the full request URL for each node to the corresponding request body for that node.
     """
@@ -387,7 +388,7 @@ def build_node_requests_for_query(
         # Ensure each task gets its own copy of the base query.
         # Otherwise, mutating the original dict would cause all tasks to share the same final dataset_uuids value
         # since 'query' is passed by reference.
-        node_query = query_to_federate.copy()
+        node_query = deepcopy(query_to_federate)
         if node.get("dataset_uuids") is not None:
             node_query["dataset_uuids"] = node.get("dataset_uuids")
         node_requests[node_request_url] = node_query
