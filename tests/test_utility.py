@@ -233,7 +233,7 @@ def test_validate_queried_nodes(monkeypatch, raw_nodes, expected_nodes):
         },
     )
 
-    assert util.validate_queried_nodes(raw_nodes) == expected_nodes
+    assert util.validate_and_format_queried_nodes(raw_nodes) == expected_nodes
 
 
 @pytest.mark.parametrize(

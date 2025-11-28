@@ -135,25 +135,26 @@ async def post_subjects(
         Response of the POST request.
 
     """
-    node_datasets_filters = util.validate_queried_nodes(query.get("nodes"))
-    node_urls = [node["node_url"] for node in node_datasets_filters]
+    # NOTE: The 'nodes' field in a single request can only be ALL dicts
+    nodes_filter = util.validate_and_format_queried_nodes(query.get("nodes"))
+    node_urls = [node["node_url"] for node in nodes_filter]
 
+    # Extract just the base query (i.e., the query to federate)
     query.pop("nodes", None)
 
+    node_requests = util.build_node_requests_for_query(
+        path="subjects",
+        nodes_filter=nodes_filter,
+        query_to_federate=query,
+    )
+
     tasks = []
-    # NOTE: Nodes in a single request can only be ALL dicts
-    for node_datasets_filter in node_datasets_filters:
-        node_request_url = node_datasets_filter["node_url"] + "subjects"
-        # Ensure each task gets its own copy of the base query.
-        # Otherwise, mutating the original dict would cause all tasks to share the same final dataset_uuids value
-        # since 'query' is passed by reference.
-        node_query = query.copy()
-        node_query["dataset_uuids"] = node_datasets_filter.get("dataset_uuids")
+    for request_url, request_body in node_requests.items():
         tasks.append(
             util.send_request(
                 method="POST",
-                url=node_request_url,
-                body=node_query,
+                url=request_url,
+                body=request_body,
                 token=token,
             )
         )
@@ -164,7 +165,7 @@ async def post_subjects(
     )
 
     return build_combined_response(
-        total_nodes=len(node_datasets_filters),
+        total_nodes=len(nodes_filter),
         cross_node_results=cross_node_results,
         node_errors=node_errors,
     )
@@ -191,20 +192,27 @@ async def post_datasets(
         Response of the POST request.
 
     """
-    nodes = util.validate_queried_nodes(query.get("nodes"))
-    node_urls = [node["node_url"] for node in nodes]
+    nodes_filter = util.validate_and_format_queried_nodes(query.get("nodes"))
+    node_urls = [node["node_url"] for node in nodes_filter]
 
     query.pop("nodes", None)
 
-    tasks = [
-        util.send_request(
-            method="POST",
-            url=node_request_url,
-            body=query,
-            token=token,
+    node_requests = util.build_node_requests_for_query(
+        path="datasets",
+        nodes_filter=nodes_filter,
+        query_to_federate=query,
+    )
+
+    tasks = []
+    for request_url, request_body in node_requests.items():
+        tasks.append(
+            util.send_request(
+                method="POST",
+                url=request_url,
+                body=request_body,
+                token=token,
+            )
         )
-        for node_request_url in build_node_request_urls(node_urls, "datasets")
-    ]
 
     responses = await asyncio.gather(*tasks, return_exceptions=True)
 

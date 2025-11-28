@@ -232,7 +232,7 @@ def validate_query_node_url_list(node_urls: list) -> list:
     return node_urls
 
 
-def validate_queried_nodes(
+def validate_and_format_queried_nodes(
     nodes: list[dict] | None,
 ) -> list[dict]:
     """
@@ -373,3 +373,23 @@ def is_valid_dict_response(
     if isinstance(response, HTTPException):
         return False, response.detail
     return False, "Unexpected response format received from node"
+
+
+def build_node_requests_for_query(
+    path: str, nodes_filter: dict, query_to_federate: dict
+) -> dict:
+    """
+    Return a dictionary mapping the full request URL for each node to the corresponding request body for that node.
+    """
+    node_requests = {}
+    for node in nodes_filter:
+        node_request_url = node["node_url"] + path
+        # Ensure each task gets its own copy of the base query.
+        # Otherwise, mutating the original dict would cause all tasks to share the same final dataset_uuids value
+        # since 'query' is passed by reference.
+        node_query = query_to_federate.copy()
+        if node.get("dataset_uuids") is not None:
+            node_query["dataset_uuids"] = node.get("dataset_uuids")
+        node_requests[node_request_url] = node_query
+
+    return node_requests
