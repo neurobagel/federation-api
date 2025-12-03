@@ -136,6 +136,7 @@ async def post_subjects(
 
     """
     # NOTE: The 'nodes' field in a single request can only be ALL dicts
+    # Normalize trailing slashes in specified node URLs for downstream requests
     nodes_filter = util.validate_and_format_queried_nodes(query.get("nodes"))
     node_urls = [node["node_url"] for node in nodes_filter]
 

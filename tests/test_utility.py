@@ -1,4 +1,5 @@
 import json
+from copy import deepcopy
 
 import httpx
 import pytest
@@ -390,7 +391,7 @@ def test_is_valid_dict_response(
 
 
 @pytest.mark.parametrize(
-    "path,nodes_filter,query_to_federate,expected_node_requests",
+    "path,nodes_filter,query,expected_node_requests",
     [
         (
             "datasets",
@@ -401,6 +402,10 @@ def test_is_valid_dict_response(
             {
                 "min_age": 16,
                 "max_age": 25,
+                "nodes": [
+                    {"node_url": "https://firstnode.org/node/"},
+                    {"node_url": "https://secondnode.org/node/"},
+                ],
             },
             {
                 "https://firstnode.org/node/datasets": {
@@ -433,6 +438,21 @@ def test_is_valid_dict_response(
             {
                 "min_age": 16,
                 "max_age": 25,
+                "nodes": [
+                    {
+                        "node_url": "https://firstnode.org/node/",
+                        "dataset_uuids": [
+                            "http://neurobagel.org/vocab/ds-001",
+                            "http://neurobagel.org/vocab/ds-002",
+                        ],
+                    },
+                    {
+                        "node_url": "https://secondnode.org/node/",
+                        "dataset_uuids": [
+                            "http://neurobagel.org/vocab/ds-003",
+                        ],
+                    },
+                ],
             },
             {
                 "https://firstnode.org/node/subjects": {
@@ -469,7 +489,23 @@ def test_is_valid_dict_response(
                     ],
                 },
             ],
-            {},
+            {
+                "nodes": [
+                    {
+                        "node_url": "https://firstnode.org/node/",
+                        "dataset_uuids": [
+                            "http://neurobagel.org/vocab/ds-001",
+                            "http://neurobagel.org/vocab/ds-002",
+                        ],
+                    },
+                    {
+                        "node_url": "https://secondnode.org/node/",
+                        "dataset_uuids": [
+                            "http://neurobagel.org/vocab/ds-003",
+                        ],
+                    },
+                ]
+            },
             {
                 "https://firstnode.org/node/subjects": {
                     "dataset_uuids": [
@@ -487,13 +523,53 @@ def test_is_valid_dict_response(
     ],
 )
 def test_build_node_requests_for_query(
-    path, nodes_filter, query_to_federate, expected_node_requests
+    path, nodes_filter, query, expected_node_requests
 ):
+    """
+    Test that each node request for a federated query to /subjects or /datasets contains the
+    - correct base query parameters
+    - specific dataset_uuids (where applicable)
+    - and does not include the raw 'nodes' field
+    """
     assert (
         util.build_node_requests_for_query(
             path=path,
             nodes_filter=nodes_filter,
-            query=query_to_federate,
+            query=query,
         )
         == expected_node_requests
     )
+
+
+def test_raw_subjects_query_not_mutated_by_node_requests():
+    """Test that a query sent to /subjects is not mutated by build_node_requests_for_query."""
+    original_query = {
+        "min_age": 18,
+        "max_age": 25,
+        "nodes": [
+            {
+                "node_url": "https://firstnode.org/node",
+                "dataset_uuids": [
+                    "http://neurobagel.org/vocab/ds-001",
+                ],
+            },
+        ],
+    }
+    original_query_nodes = [
+        {
+            "node_url": "https://firstnode.org/node/",
+            "dataset_uuids": [
+                "http://neurobagel.org/vocab/ds-001",
+            ],
+        },
+    ]
+
+    query_copy = deepcopy(original_query)
+
+    util.build_node_requests_for_query(
+        path="subjects",
+        nodes_filter=original_query_nodes,
+        query=original_query,
+    )
+
+    assert original_query == query_copy

@@ -389,7 +389,8 @@ def build_node_requests_for_query(
         # Otherwise, mutating the original dict would cause all tasks to share the same final dataset_uuids value
         # since 'query' is passed by reference.
         node_query = deepcopy(query)
-        # Extract just the base query (i.e., the query to federate)
+        # Remove the raw 'nodes' field which we've already processed separately (nodes_filter)
+        # so we have only the base query (i.e., the query to federate)
         node_query.pop("nodes", None)
         if node.get("dataset_uuids") is not None:
             node_query["dataset_uuids"] = node.get("dataset_uuids")
