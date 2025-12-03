@@ -139,13 +139,10 @@ async def post_subjects(
     nodes_filter = util.validate_and_format_queried_nodes(query.get("nodes"))
     node_urls = [node["node_url"] for node in nodes_filter]
 
-    # Extract just the base query (i.e., the query to federate)
-    query.pop("nodes", None)
-
     node_requests = util.build_node_requests_for_query(
         path="subjects",
         nodes_filter=nodes_filter,
-        query_to_federate=query,
+        query=query,
     )
 
     tasks = []
@@ -200,7 +197,7 @@ async def post_datasets(
     node_requests = util.build_node_requests_for_query(
         path="datasets",
         nodes_filter=nodes_filter,
-        query_to_federate=query,
+        query=query,
     )
 
     tasks = []

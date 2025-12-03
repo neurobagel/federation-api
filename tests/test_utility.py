@@ -493,7 +493,7 @@ def test_build_node_requests_for_query(
         util.build_node_requests_for_query(
             path=path,
             nodes_filter=nodes_filter,
-            query_to_federate=query_to_federate,
+            query=query_to_federate,
         )
         == expected_node_requests
     )
