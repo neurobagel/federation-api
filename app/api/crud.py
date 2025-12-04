@@ -264,8 +264,8 @@ async def get_instances(attribute_path: str):
         if is_response_valid:
             # NOTE: We return only the unique attribute instances from all nodes, with uniqueness determined
             # based on the instance's *term URL*.
-            # This means that if the same instance term appears in multiple nodes with potentially different human-readable labels,
-            # only one version (term-label pairing) will be included in the response.
+            # This means that if the same term appears in multiple nodes with potentially different human-readable labels,
+            # only the final encountered instance (+ term metadata) from the nodes will be included in the response.
             for term_dict in response.get(attribute_uri):
                 unique_terms_dict[term_dict["TermURL"]] = term_dict
         else:
