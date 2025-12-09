@@ -79,8 +79,8 @@ def test_get_instances_with_duplicate_terms_handled(
     expected_unique_terms,
 ):
     """
-    When multiple nodes return an assessment with the same URI for a request to /assessments,
-    the API should return only one instance of that assessment term in the final federated response.
+    When multiple nodes return a term with the same URI,
+    the API should return only one instance of that term in the final federated response.
     """
 
     async def mock_httpx_request(self, method, url, **kwargs):

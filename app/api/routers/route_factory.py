@@ -13,7 +13,7 @@ from .. import crud
 def create_get_instances_handler(attributes_base_path: str):
     """
     Create the handler (path function) for a federated GET request to the base subpath of
-    a given attribute router, e.g. /assesssments.
+    a given attribute router, e.g. /assessments
     """
 
     async def get_instances(response: Response) -> dict:
