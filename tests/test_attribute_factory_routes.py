@@ -194,8 +194,11 @@ def test_fully_failed_get_instances_handled_gracefully(
     [
         "assessments",
         "diagnoses",
+        "imaging-modalities",
         "pipelines",
         "query",
+        "subjects",
+        "datasets",
     ],
 )
 def test_node_request_urls_do_not_have_trailing_slash(path):
