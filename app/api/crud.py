@@ -1,11 +1,11 @@
 """CRUD functions called by path operations."""
 
 import asyncio
-import logging
 
 from fastapi import HTTPException
 
 from . import utility as util
+from .logger import logger
 
 
 # TODO: Consider removing in future -
@@ -29,7 +29,7 @@ def build_combined_response(
     content = {"errors": node_errors, "responses": cross_node_results}
 
     if node_errors:
-        logging.warning(
+        logger.warning(
             f"Requests to {len(node_errors)}/{total_nodes} nodes failed: {[node_error['node_name'] for node_error in node_errors]}."
         )
         if len(node_errors) == total_nodes:
@@ -38,7 +38,7 @@ def build_combined_response(
         else:
             content["nodes_response_status"] = "partial success"
     else:
-        logging.info(
+        logger.info(
             f"Requests to all nodes succeeded ({total_nodes}/{total_nodes})."
         )
         content["nodes_response_status"] = "success"
@@ -56,7 +56,7 @@ def gather_node_query_responses(node_urls: list, responses: list):
             node_errors.append(
                 {"node_name": node_name, "error": response.detail}
             )
-            logging.warning(
+            logger.warning(
                 f"Request to node {node_name} ({node_url}) did not succeed: {response.detail}"
             )
         else:
@@ -270,7 +270,7 @@ async def get_instances(attribute_path: str):
                 unique_terms_dict[term_dict["TermURL"]] = term_dict
         else:
             node_errors.append({"node_name": node_name, "error": node_error})
-            logging.warning(
+            logger.warning(
                 f"Request to node {node_name} ({node_url}) did not succeed: {node_error}"
             )
 
@@ -319,7 +319,7 @@ async def get_pipeline_versions(pipeline_term: str):
             all_pipe_versions.extend(response.get(pipeline_term))
         else:
             node_errors.append({"node_name": node_name, "error": node_error})
-            logging.warning(
+            logger.warning(
                 f"Request to node {node_name} ({node_url}) did not succeed: {node_error}"
             )
 

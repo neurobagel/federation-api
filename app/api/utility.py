@@ -1,7 +1,6 @@
 """Constants and utility functions for federation."""
 
 import json
-import logging
 import os
 import warnings
 from collections import namedtuple
@@ -13,6 +12,8 @@ import httpx
 import jsonschema
 from fastapi import HTTPException, status
 from jsonschema import validate
+
+from .logger import logger
 
 EnvVar = namedtuple("EnvVar", ["name", "value"])
 
@@ -177,12 +178,12 @@ async def create_federation_node_index():
             )
 
             if local_nodes:
-                logging.warning(
+                logger.warning(
                     failed_get_warning
                     + f"Federation will be limited to the nodes defined locally for this API: {local_nodes}."
                 )
             else:
-                logging.warning(failed_get_warning)
+                logger.warning(failed_get_warning)
                 raise RuntimeError(
                     "No local or public Neurobagel nodes available for federation."
                     "Please define at least one local node in "
