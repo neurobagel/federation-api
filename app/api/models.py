@@ -94,6 +94,8 @@ class DatasetsQueryResponse(BaseModel):
     image_modals: list
     available_pipelines: dict
 
+    model_config = ConfigDict(extra="ignore")
+
 
 class SubjectsQueryResponse(BaseModel):
     """Data model for subject-level results for one dataset matching a given query."""
@@ -101,6 +103,8 @@ class SubjectsQueryResponse(BaseModel):
     node_name: str
     dataset_uuid: str
     subject_data: list[dict] | str
+
+    model_config = ConfigDict(extra="ignore")
 
 
 class CohortQueryResponse(BaseModel):
