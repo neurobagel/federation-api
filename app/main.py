@@ -1,6 +1,5 @@
 """Main app."""
 
-import logging
 from contextlib import asynccontextmanager
 
 import uvicorn
@@ -21,12 +20,6 @@ from .api.routers import (
     subjects,
 )
 from .api.security import check_client_id
-
-logger = logging.getLogger("nb-f-API")
-stdout_handler = logging.StreamHandler()
-
-logger.setLevel(logging.INFO)
-logger.addHandler(stdout_handler)
 
 favicon_url = "https://raw.githubusercontent.com/neurobagel/documentation/main/docs/imgs/logo/neurobagel_favicon.png"
 
