@@ -30,19 +30,20 @@ def test_valid_nodes_do_not_error(
     test_app,
     disable_auth,
     set_valid_test_federation_nodes,
-    mocked_single_matching_dataset_result,
+    mocked_subjects_query_response_for_dataset,
     valid_nodes,
     monkeypatch,
     caplog,
 ):
     """
-    Smoke test that when a valid 'nodes' list is provided, POST /subjects does not raise an error and returns a combined response.
+    Smoke test that when a valid 'nodes' list is provided, POST /subjects does not raise an error and returns a combined response
+    containing only subject data.
     """
     caplog.set_level(logging.INFO)
 
     async def mock_httpx_request(self, method, url, **kwargs):
         return httpx.Response(
-            status_code=200, json=[mocked_single_matching_dataset_result]
+            status_code=200, json=[mocked_subjects_query_response_for_dataset]
         )
 
     monkeypatch.setattr(httpx.AsyncClient, "request", mock_httpx_request)
@@ -55,6 +56,10 @@ def test_valid_nodes_do_not_error(
     assert response["errors"] == []
     assert len(response["responses"]) == 2
     assert "Requests to all nodes succeeded (2/2)" in caplog.text
+    for response in response["responses"]:
+        assert "subject_data" in response
+        assert "dataset_name" not in response
+        assert "num_matching_subjects" not in response
 
 
 @pytest.mark.parametrize(
