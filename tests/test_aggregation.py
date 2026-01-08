@@ -156,7 +156,7 @@ from app.api import utility as util
         ),
     ],
 )
-def test_outdated_node_responses_handled_gracefully(
+def test_unrecognized_fields_in_node_responses_handled_gracefully(
     monkeypatch,
     responses_from_nodes,
     response_cls,
