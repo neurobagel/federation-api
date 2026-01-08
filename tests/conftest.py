@@ -82,7 +82,7 @@ def mock_failed_connection_httpx_request():
 
 
 @pytest.fixture()
-def mocked_cohort_query_response_for_dataset():
+def mocked_cohort_query_response_for_single_dataset():
     """Valid aggregate query response for a single matching dataset from a request to GET /query."""
     return {
         "dataset_uuid": "http://neurobagel.org/vocab/12345",
@@ -108,7 +108,7 @@ def mocked_cohort_query_response_for_dataset():
 
 
 @pytest.fixture()
-def mocked_subjects_query_response_for_dataset():
+def mocked_subjects_query_response_for_single_dataset():
     """Valid aggregate query response for a single matching dataset from a request to POST /subjects."""
     return {
         "dataset_uuid": "http://neurobagel.org/vocab/12345",
@@ -117,7 +117,7 @@ def mocked_subjects_query_response_for_dataset():
 
 
 @pytest.fixture()
-def mocked_datasets_query_response_for_dataset():
+def mocked_datasets_query_response_for_single_dataset():
     """Valid aggregate query response for a single matching dataset from a request to POST /datasets."""
     return {
         "dataset_uuid": "http://neurobagel.org/vocab/12345",

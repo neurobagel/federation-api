@@ -20,7 +20,7 @@ def test_valid_nodes_do_not_error(
     test_app,
     disable_auth,
     set_valid_test_federation_nodes,
-    mocked_datasets_query_response_for_dataset,
+    mocked_datasets_query_response_for_single_dataset,
     valid_nodes,
     monkeypatch,
     caplog,
@@ -31,7 +31,8 @@ def test_valid_nodes_do_not_error(
 
     async def mock_httpx_request(self, method, url, **kwargs):
         return httpx.Response(
-            status_code=200, json=[mocked_datasets_query_response_for_dataset]
+            status_code=200,
+            json=[mocked_datasets_query_response_for_single_dataset],
         )
 
     monkeypatch.setattr(httpx.AsyncClient, "request", mock_httpx_request)
