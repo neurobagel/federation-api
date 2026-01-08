@@ -1,6 +1,7 @@
 """Constants and utility functions for federation."""
 
 import json
+import logging
 import os
 import warnings
 from collections import namedtuple
@@ -13,7 +14,7 @@ import jsonschema
 from fastapi import HTTPException, status
 from jsonschema import validate
 
-from .logger import logger
+logger = logging.getLogger(__name__)
 
 EnvVar = namedtuple("EnvVar", ["name", "value"])
 

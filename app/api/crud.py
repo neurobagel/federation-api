@@ -1,11 +1,13 @@
 """CRUD functions called by path operations."""
 
 import asyncio
+import logging
 
 from fastapi import HTTPException
 
 from . import utility as util
-from .logger import logger
+
+logger = logging.getLogger(__name__)
 
 
 # TODO: Consider removing in future -
