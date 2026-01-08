@@ -5,10 +5,11 @@ from app.api import utility as util
 
 
 @pytest.mark.parametrize(
-    "responses_from_nodes,response_cls,expected_combined_results_payload",
+    "response_cls,responses_from_nodes,expected_combined_results_payload",
     [
         (
             [
+                models.SubjectsQueryResponse,
                 [  # from Up-to-date Node
                     {
                         "dataset_uuid": "http://neurobagel.org/vocab/12345",
@@ -39,7 +40,6 @@ from app.api import utility as util
                     }
                 ],
             ],
-            models.SubjectsQueryResponse,
             [
                 {
                     "node_name": "Up-to-date Node",
@@ -54,6 +54,7 @@ from app.api import utility as util
             ],
         ),
         (
+            models.DatasetsQueryResponse,
             [
                 [  # from Up-to-date Node
                     {
@@ -81,7 +82,7 @@ from app.api import utility as util
                     {
                         "dataset_uuid": "http://neurobagel.org/vocab/12345",
                         "dataset_name": "QPN",
-                        "dataset_portal_uri": "https://rpq-qpn.ca/en/researchers-section/databases/",
+                        "dataset_portal_uri": "https://rpq-qpn.ca/en/researchers-section/databases/",  # deprecated field
                         "dataset_total_subjects": 200,
                         "num_matching_subjects": 5,
                         "records_protected": True,
@@ -100,7 +101,6 @@ from app.api import utility as util
                     },
                 ],
             ],
-            models.DatasetsQueryResponse,
             [
                 {
                     "node_name": "Up-to-date Node",
@@ -182,6 +182,9 @@ def test_unrecognized_fields_in_node_responses_handled_gracefully(
         responses=responses_from_nodes,
         response_cls=response_cls,
     )
+    # We need to dump the models to dicts because gather_node_query_responses returns Pydantic model instances
+    # (FastAPI handles the conversion to JSON automatically when returning responses)
+    # but here we want to compare the actual payload content
     combined_results_payload = [resp.model_dump() for resp in combined_results]
 
     assert combined_results_payload == expected_combined_results_payload
