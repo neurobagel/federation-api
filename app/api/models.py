@@ -107,14 +107,12 @@ class SubjectsQueryResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
 
-class CohortQueryResponse(BaseModel):
+class CohortQueryResponse(SubjectsQueryResponse):
     """
     Data model for a legacy GET /query endpoint response from a single node,
     for backwards-compatibility only.
     """
 
-    node_name: str
-    dataset_uuid: str
     dataset_name: str
     dataset_portal_uri: str | None
     dataset_total_subjects: int
@@ -122,7 +120,6 @@ class CohortQueryResponse(BaseModel):
     num_matching_subjects: int
     image_modals: list
     available_pipelines: dict
-    subject_data: list[dict] | str
 
 
 class NodesResponseStatus(str, Enum):
