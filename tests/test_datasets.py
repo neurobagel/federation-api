@@ -51,16 +51,8 @@ def test_valid_nodes_query_does_not_error(
     "valid_nodes",
     [
         [
-            {
-                "node_url": "https://firstpublicnode.org/",
-                "dataset_uuids": [
-                    "http://neurobagel.org/vocab/12345",
-                    "http://neurobagel.org/vocab/67890",
-                ],
-            },
-            {
-                "node_url": "https://secondpublicnode.org/",
-            },
+            {"node_url": "https://firstpublicnode.org/"},
+            {"node_url": "https://secondpublicnode.org/"},
         ],
         [],
         None,

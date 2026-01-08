@@ -8,8 +8,8 @@ from app.api import utility as util
     "response_cls,responses_from_nodes,expected_combined_results_payload",
     [
         (
+            models.SubjectsQueryResponse,
             [
-                models.SubjectsQueryResponse,
                 [  # from Up-to-date Node
                     {
                         "dataset_uuid": "http://neurobagel.org/vocab/12345",
