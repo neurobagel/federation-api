@@ -188,7 +188,7 @@ async def create_federation_node_index():
                 log_and_raise_error(
                     logger,
                     RuntimeError,
-                    "No local or public Neurobagel nodes available for federation."
+                    "No local or public Neurobagel nodes available for federation. "
                     "Please define at least one local node in "
                     "a 'local_nb_nodes.json' file in the "
                     "current directory and try again.",
