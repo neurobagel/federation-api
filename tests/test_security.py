@@ -1,7 +1,18 @@
 import pytest
 from fastapi import HTTPException
 
+from app.api import security
 from app.api.security import extract_token, verify_token
+
+
+def test_default_auth_settings():
+    """
+    Test that by default, authentication is disabled and the client ID is not set.
+
+    TODO: This test will be made more robust as part of addressing https://github.com/neurobagel/federation-api/issues/166.
+    """
+    assert security.AUTH_ENABLED is False
+    assert security.CLIENT_ID is None
 
 
 def test_missing_client_id_raises_error_when_auth_enabled(
