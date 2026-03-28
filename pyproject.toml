@@ -54,3 +54,11 @@ version-file = "app/_version.py"  # useful for accessing dynamically calculated 
 
 [tool.hatch.version.raw-options]
 local_scheme = "no-local-version"  # do not append local version info to the version string to avoid PyPI upload errors
+
+[tool.black]
+line-length = 79
+
+[tool.isort]
+profile = "black"
+filter_files = true
+line_length = 79
