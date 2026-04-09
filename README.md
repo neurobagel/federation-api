@@ -73,7 +73,7 @@ Once `uv` is installed, just run
 uv sync --group dev
 ```
 
-to set up things in editable mode.
+to set up the project in editable mode.
 
 And then launch the API with 
 
