@@ -40,8 +40,8 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-	"coverage",
-	"pytest",
+    "pytest",
+    "pytest-cov",
 	"pytest-asyncio",
 	"pre-commit"
 ]

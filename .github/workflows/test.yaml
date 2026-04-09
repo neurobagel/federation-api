@@ -27,8 +27,7 @@ jobs:
 
     - name: Test with pytest
       run: |
-        uv run coverage run -m pytest
-        uv run coverage lcov -o ./coverage/lcov.info
+        uv run pytest --cov --cov-branch --cov-report=xml
 
     - name: Upload results to Codecov
       uses: codecov/codecov-action@v6

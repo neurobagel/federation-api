@@ -62,7 +62,7 @@ docker run -d -v ${PWD}/local_nb_nodes.json:/usr/src/local_nb_nodes.json:ro \
 ```
 NOTE: You can replace the port number `8080` for the `-p` flag with any port on the host you wish to use for the API.
 
-### 3. Create a local development environment
+## Setting up a local development environment
 
 We [use `uv`](https://docs.astral.sh/uv/getting-started/installation/)
 for our local dev environment.
