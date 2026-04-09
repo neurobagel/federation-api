@@ -81,7 +81,7 @@ And then launch the API with
 uv run uvicorn app.main:app
 ```
 
-Also don't forget to set up precommit with
+Also don't forget to set up pre-commit with
 
 ```bash
 uv run pre-commit install
