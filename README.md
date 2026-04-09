@@ -67,7 +67,7 @@ NOTE: You can replace the port number `8080` for the `-p` flag with any port on 
 We [use `uv`](https://docs.astral.sh/uv/getting-started/installation/)
 for our local dev environment.
 
-Once installed, just run
+Once `uv` is installed, just run
 
 ```bash
 uv sync --group dev
