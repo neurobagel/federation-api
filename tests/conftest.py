@@ -150,8 +150,8 @@ def mocked_datasets_query_response_for_single_dataset():
 
 
 @pytest.fixture()
-def mocked_datasets_query_response_in_catalog_mode():
-    """Valid aggregate query response for a single matching dataset in catalog mode from a request to POST /datasets."""
+def mocked_datasets_query_response_for_single_dataset_from_catalog_node():
+    """Valid aggregate query response for a single matching dataset from a catalog node from a request to POST /datasets."""
     return {
         "dataset_uuid": "http://neurobagel.org/vocab/12345",
         "dataset_name": "QPN",

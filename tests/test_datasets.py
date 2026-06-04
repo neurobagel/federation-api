@@ -5,7 +5,7 @@ from fastapi import status
 ROUTE = "/datasets"
 
 
-@pytest.mark.parametrize("mock_response_type", ["single", "catalog"])
+@pytest.mark.parametrize("mock_node_type", ["subject-level", "catalog"])
 @pytest.mark.parametrize(
     "valid_nodes",
     [
@@ -24,7 +24,7 @@ def test_valid_nodes_query_does_not_error(
     mocked_datasets_query_response_for_single_dataset,
     mocked_datasets_query_response_in_catalog_mode,
     valid_nodes,
-    mock_response_type,
+    mock_node_type,
     monkeypatch,
     caplog,
 ):
@@ -33,7 +33,7 @@ def test_valid_nodes_query_does_not_error(
     """
 
     async def mock_httpx_request(self, method, url, **kwargs):
-        if mock_response_type == "single":
+        if mock_node_type == "subject-level":
             return httpx.Response(
                 status_code=200,
                 json=[mocked_datasets_query_response_for_single_dataset],
@@ -107,7 +107,7 @@ def test_valid_nodes_query_returns_only_dataset_metadata(
         None,
     ],
 )
-def test_valid_nodes_query_returns_only_dataset_metadata_in_catalog_mode(
+def test_valid_nodes_query_returns_only_catalog_metadata_from_catalog_nodes(
     test_app,
     disable_auth,
     set_valid_test_federation_nodes,
@@ -116,8 +116,8 @@ def test_valid_nodes_query_returns_only_dataset_metadata_in_catalog_mode(
     monkeypatch,
 ):
     """
-    Test that when a valid 'nodes' list is provided, the POST /datasets response includes expected
-    dataset-level metadata fields and no subject, imaging, or derivative data in catalog mode.
+    Test that when a valid 'nodes' list is provided and all known nodes are in catalog mode, the POST /datasets response includes expected
+    dataset-level metadata fields and no subject, imaging, or derivative data.
     """
 
     async def mock_httpx_request(self, method, url, **kwargs):
