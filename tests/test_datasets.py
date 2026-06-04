@@ -22,7 +22,7 @@ def test_valid_nodes_query_does_not_error(
     disable_auth,
     set_valid_test_federation_nodes,
     mocked_datasets_query_response_for_single_dataset,
-    mocked_datasets_query_response_in_catalog_mode,
+    mocked_datasets_query_response_for_single_dataset_from_catalog_node,
     valid_nodes,
     mock_node_type,
     monkeypatch,
@@ -40,7 +40,9 @@ def test_valid_nodes_query_does_not_error(
             )
         return httpx.Response(
             status_code=200,
-            json=[mocked_datasets_query_response_in_catalog_mode],
+            json=[
+                mocked_datasets_query_response_for_single_dataset_from_catalog_node
+            ],
         )
 
     monkeypatch.setattr(httpx.AsyncClient, "request", mock_httpx_request)
@@ -111,7 +113,7 @@ def test_valid_nodes_query_returns_only_catalog_metadata_from_catalog_nodes(
     test_app,
     disable_auth,
     set_valid_test_federation_nodes,
-    mocked_datasets_query_response_in_catalog_mode,
+    mocked_datasets_query_response_for_single_dataset_from_catalog_node,
     valid_nodes,
     monkeypatch,
 ):
@@ -123,7 +125,9 @@ def test_valid_nodes_query_returns_only_catalog_metadata_from_catalog_nodes(
     async def mock_httpx_request(self, method, url, **kwargs):
         return httpx.Response(
             status_code=200,
-            json=[mocked_datasets_query_response_in_catalog_mode],
+            json=[
+                mocked_datasets_query_response_for_single_dataset_from_catalog_node
+            ],
         )
 
     monkeypatch.setattr(httpx.AsyncClient, "request", mock_httpx_request)
