@@ -267,7 +267,7 @@ async def get_instances(attribute_path: str) -> dict:
     # At the moment we set it to a low number to ensure instances can be fetched
     # within a reasonable time by the query tool
     tasks = [
-        util.send_request(method="GET", url=node_request_url, timeout=10)
+        util.send_request(method="GET", url=node_request_url, timeout=5)
         for node_request_url in build_node_request_urls(
             util.FEDERATION_NODES, attribute_path
         )
