@@ -49,7 +49,7 @@ def mock_verify_token():
 def set_mock_verify_token(monkeypatch, mock_verify_token):
     """Set the verify_token function to a mock that does not raise any exceptions."""
     monkeypatch.setattr(
-        "app.api.routers.query.verify_token",
+        "app.api.routers.subjects.verify_token",
         mock_verify_token,
     )
 

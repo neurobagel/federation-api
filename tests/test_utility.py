@@ -28,34 +28,34 @@ def test_add_trailing_slash(url, expected_url):
     [
         (
             {
-                "ApiURL": "http://firstnode.neurobagel.org/query",
+                "ApiURL": "http://firstnode.neurobagel.org/",
                 "NodeName": "firstnode",
             },
-            {"http://firstnode.neurobagel.org/query/": "firstnode"},
+            {"http://firstnode.neurobagel.org/": "firstnode"},
         ),
         (
             [
                 {
-                    "ApiURL": "http://firstnode.neurobagel.org/query",
+                    "ApiURL": "http://firstnode.neurobagel.org/",
                     "NodeName": "firstnode",
                 }
             ],
-            {"http://firstnode.neurobagel.org/query/": "firstnode"},
+            {"http://firstnode.neurobagel.org/": "firstnode"},
         ),
         (
             [
                 {
-                    "ApiURL": "https://firstnode.neurobagel.org/query/",
+                    "ApiURL": "https://firstnode.neurobagel.org/",
                     "NodeName": "firstnode",
                 },
                 {
-                    "ApiURL": "https://secondnode.neurobagel.org/query",
+                    "ApiURL": "https://secondnode.neurobagel.org/",
                     "NodeName": "secondnode",
                 },
             ],
             {
-                "https://firstnode.neurobagel.org/query/": "firstnode",
-                "https://secondnode.neurobagel.org/query/": "secondnode",
+                "https://firstnode.neurobagel.org/": "firstnode",
+                "https://secondnode.neurobagel.org/": "secondnode",
             },
         ),
     ],
