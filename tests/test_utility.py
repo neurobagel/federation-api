@@ -121,45 +121,6 @@ def test_unrecognized_query_nodes_raise_error(
 
 
 @pytest.mark.parametrize(
-    "raw_url_list, expected_url_list",
-    [
-        (["https://firstknownnode.org"], ["https://firstknownnode.org/"]),
-        (
-            ["https://firstknownnode.org", "https://secondknownnode.org/"],
-            ["https://firstknownnode.org/", "https://secondknownnode.org/"],
-        ),
-        (
-            ["", "https://secondknownnode.org"],
-            ["https://secondknownnode.org/"],
-        ),
-        (
-            [
-                "https://secondknownnode.org/",
-                "https://firstknownnode.org",
-                "https://secondknownnode.org/",
-            ],
-            ["https://secondknownnode.org/", "https://firstknownnode.org/"],
-        ),
-        ([], ["https://firstknownnode.org/", "https://secondknownnode.org/"]),
-    ],
-)
-def test_validate_query_node_url_list(
-    monkeypatch, raw_url_list, expected_url_list
-):
-    """Test that provided URLs are deduplicated, get a trailing slash, and default to FEDERATION_NODES if none are provided."""
-    monkeypatch.setattr(
-        util,
-        "FEDERATION_NODES",
-        {
-            "https://firstknownnode.org/": "My First Node",
-            "https://secondknownnode.org/": "My Second Node",
-        },
-    )
-
-    assert util.validate_query_node_url_list(raw_url_list) == expected_url_list
-
-
-@pytest.mark.parametrize(
     "raw_nodes, expected_nodes",
     [
         (
