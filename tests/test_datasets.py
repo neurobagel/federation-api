@@ -184,3 +184,40 @@ def test_invalid_nodes_query_raises_error(
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert expected_error in response.text
+
+
+def test_and_type_query_for_categorical_variables_does_not_error(
+    test_app,
+    disable_auth,
+    set_valid_test_federation_nodes,
+    mocked_datasets_query_response_for_single_dataset,
+    monkeypatch,
+):
+    """
+    Test that an AND-style query request body containing multiple filters for the same phenotypic field
+    does not raise a request validation error.
+    """
+
+    async def mock_httpx_request(self, method, url, **kwargs):
+        return httpx.Response(
+            status_code=200,
+            json=[mocked_datasets_query_response_for_single_dataset],
+        )
+
+    monkeypatch.setattr(httpx.AsyncClient, "request", mock_httpx_request)
+
+    response = test_app.post(
+        ROUTE,
+        json={
+            "diagnosis": ["snomed:12345", "snomed:67890"],
+            "assessment": ["snomed:11111", "snomed:22222"],
+            "image_modal": ["nidm:T1Weighted", "nidm:T2Weighted"],
+            "pipeline": [{"name": "fmriprep"}, {"name": "freesurfer"}],
+        },
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    response = response.json()
+    assert response["nodes_response_status"] == "success"
+    assert response["errors"] == []
+    assert len(response["responses"]) > 0
