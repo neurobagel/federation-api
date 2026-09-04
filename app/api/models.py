@@ -30,9 +30,9 @@ class BaseQueryModel(BaseModel):
     image_modal: list[str] = Field(
         default_factory=list, description="Imaging modality of subject scans."
     )
-    pipeline_name: list[dict[str, str]] = Field(
+    pipeline: list[dict[str, str]] = Field(
         default_factory=list,
-        description="Version of pipeline run on subject scans.",
+        description="Pipeline run on subject scans.",
     )
 
     model_config = ConfigDict(extra="forbid")
