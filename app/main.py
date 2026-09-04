@@ -7,7 +7,7 @@ import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
-from fastapi.responses import HTMLResponse, ORJSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 from .api import utility as util
 from .api.routers import (
@@ -17,7 +17,6 @@ from .api.routers import (
     imaging_modalities,
     nodes,
     pipelines,
-    query,
     subjects,
 )
 from .api.security import check_client_id
@@ -46,7 +45,6 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     root_path=util.ROOT_PATH.value,
-    default_response_class=ORJSONResponse,
     docs_url=None,
     redoc_url=None,
     lifespan=lifespan,
@@ -148,7 +146,6 @@ def overridden_redoc(request: Request):
     )
 
 
-app.include_router(query.router)
 app.include_router(subjects.router)
 app.include_router(datasets.router)
 app.include_router(assessments.router)
