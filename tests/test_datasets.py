@@ -186,7 +186,7 @@ def test_invalid_nodes_query_raises_error(
     assert expected_error in response.text
 
 
-def test_and_type_query_for_categorical_variables_does_not_error(
+def test_and_query_for_categorical_variables_does_not_error(
     test_app,
     disable_auth,
     set_valid_test_federation_nodes,
