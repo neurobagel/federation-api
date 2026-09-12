@@ -177,7 +177,6 @@ def test_invalid_nodes_query_raises_error(
     set_valid_test_federation_nodes,
     invalid_nodes,
     expected_error,
-    monkeypatch,
 ):
     """Test that when an invalid 'nodes' list is provided, POST /datasets raises a 422 error with an appropriate message."""
     response = test_app.post(ROUTE, json={"nodes": invalid_nodes})
@@ -221,3 +220,19 @@ def test_and_query_for_categorical_variables_does_not_error(
     assert response["nodes_response_status"] == "success"
     assert response["errors"] == []
     assert len(response["responses"]) > 0
+
+
+def test_str_value_for_list_filter_field_raises_error(
+    test_app,
+    disable_auth,
+    set_valid_test_federation_nodes,
+):
+    """
+    Test that a request body containing a string value for a filter field that
+    expects a list (i.e., supports AND queries) raises a validation error.
+    """
+
+    response = test_app.post(ROUTE, json={"diagnosis": "snomed:12345"})
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert "should be a valid list" in response.text
